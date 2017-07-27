@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.fyg.cuadrillas.dao.MenuNTx">
+<resultMap type="Menu" id="menu">
+    <result column="id_perfil" property="idPerfil"/>
+    <result column="id_menu_perfil" property="idMenuPerfil"/>
+    <result column="orden" property="orden"/>
+    <result column="estatus_perfil" property="estatusPerfil"/>
+    <result column="id_menu" property="idMenu"/>
+    <result column="id_padre" property="idPadre"/>
+	<result column="menu" property="menu"/>
+	<result column="descripcion" property="descripcion"/>
+	<result column="url" property="url"/>
+	<result column="estatus" property="estatus"/>
+</resultMap>
+
+<select id="consultaMenu" parameterType="Integer" resultMap="menu">
+
+	SELECT m.id_menu AS idMenu,
+			m.id_padre AS idPadre,
+			m.menu AS menu,
+			m.descripcion AS descripcion,m.url AS url
+	FROM perfil_menu pm
+	INNER JOIN menu m  ON m.id_menu = pm.id_menu
+	WHERE pm.id_perfil = #{idPerfil}
+	AND pm.estatus = 'A'
+	AND m.estatus = 'A'
+	ORDER BY id_padre, orden;
+</select>
+
+</mapper>

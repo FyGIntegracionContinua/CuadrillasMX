@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.AgendaTx">
+
+<insert id="altaAgenda" parameterType="Agenda" useGeneratedKeys="true" keyProperty="id_agenda"  keyColumn="id_agenda">
+INSERT INTO agenda(id_contrato,id_cuadrilla,fecha_inicio,fecha_fin,no_trabajadores,no_horas,no_semana,fecha_alta,usuario_alta,estatus)
+VALUES(
+	#{idContrato},
+	( SELECT id_cuadrilla FROM cuadrilla WHERE codigo_vialidad = (SELECT codigo_vialidad FROM contrato WHERE id_contrato =#{idContrato}) AND estatus = 'A'),
+	#{fechaInicio},#{fechaFin},#{noTrabajadores},#{noHoras},#{noSemana},now(),#{usuario},'A')
+
+    <selectKey keyProperty="idAgenda" resultType="Integer" order="AFTER">
+		SELECT LAST_INSERT_ID();
+	</selectKey>
+</insert>
+
+<insert id="registraAgendaDetalles" parameterType="AgendaDetalle" useGeneratedKeys="true" keyProperty="id_agenda_detalle"  keyColumn="id_agenda_detalle">
+INSERT INTO agenda_detalle(id_agenda,fecha,avance_esperado,observaciones,fecha_alta,usuario_alta,estatus)
+VALUES (
+#{idAgenda},#{fecha},#{avanceEsperado},#{observaciones},now(),#{usuarioAlta},'A'
+)
+<selectKey keyProperty="idAgendaDetalle" resultType="Integer" order="AFTER">
+		SELECT LAST_INSERT_ID();
+</selectKey>
+</insert>
+
+<insert id="registraAgendaActividad" parameterType="java.util.HashMap">
+	INSERT INTO agenda_actividades
+	(
+		id_agenda_detalle,codigo_actividad,usuario_alta,fecha_alta,estatus
+	)
+	VALUES
+	(
+		#{id_agenda_detalle}, #{actividad}, #{usuario}, now(), 'A'
+	)
+</insert>
+
+<insert id="registraAgendaMateria" parameterType="java.util.HashMap">
+INSERT INTO agenda_materiales(id_agenda_detalle,codigo_material,usuario_alta,fecha_alta,estatus)
+VALUES
+(
+#{id_agenda_detalle},#{material},#{usuario},now(),'A'
+)
+</insert>
+
+<insert id="registraAgendaCoordenada" parameterType="java.util.HashMap">
+INSERT INTO agenda_coordenadas
+		(
+			id_agenda_detalle,	orden,	direccion,
+			latitud,	longitud, usuario_alta,fecha_alta,	estatus
+		)
+	VALUES
+	 	(
+			#{id_agenda_detalle}, #{orden},	#{direccion},
+			#{latitud},	#{longitud},#{usuario}, now(),'A'
+	 	)
+</insert>
+
+<update id="bajaAgenda" parameterType="Agenda">
+UPDATE agenda SET
+		estatus = 'I',
+		usuario_baja = #{usuario},
+		usuario_ult_mod= #{usuario},
+		fecha_baja = now(),
+		fecha_ult_mod = now()
+WHERE id_agenda = #{idAgenda}
+AND estatus = 'A'
+</update>
+
+<update id="modificaAgenda" parameterType="Agenda">
+UPDATE agenda SET
+		id_contrato = #{idContrato},
+		fecha_inicio = #{fechaInicio},
+		fecha_fin = #{fechaFin},
+		no_trabajadores = #{noTrabajadores},
+		no_horas = #{noHoras},
+		no_semana = #{noSemana},
+		usuario_ult_mod= #{usuario},
+		fecha_ult_mod = now()
+WHERE id_agenda = #{idAgenda}
+AND estatus = 'A'
+</update>
+
+<update id="eliminaAgendaDetalle" parameterType="java.util.HashMap">
+	DELETE FROM agenda_detalle
+	WHERE id_agenda = #{id_agenda}
+</update>
+
+<delete id="eliminaActividades" parameterType="java.util.HashMap">
+	DELETE FROM agenda_actividades
+	WHERE id_agenda_detalle IN (
+		SELECT id_agenda_detalle FROM agenda_detalle WHERE id_agenda =  #{id_agenda}
+	)
+</delete>
+
+<delete id="eliminaMateriales" parameterType="java.util.HashMap">
+	DELETE FROM agenda_materiales
+	WHERE id_agenda_detalle IN (
+		SELECT id_agenda_detalle FROM agenda_detalle WHERE id_agenda =  #{id_agenda}
+	)
+</delete>
+
+<delete id="eliminaAgendaCoordenadas" parameterType="java.util.HashMap">
+	DELETE FROM agenda_coordenadas
+	WHERE id_agenda_detalle IN (
+		SELECT id_agenda_detalle FROM agenda_detalle WHERE id_agenda =  #{id_agenda}
+	)
+</delete>
+
+
+<insert id="registroActividadDiaria" parameterType="ActividadDiaria" useGeneratedKeys="true" keyProperty="id_actividad_diaria"  keyColumn="id_actividad_diaria">
+	INSERT INTO actividad_diaria
+	(
+	id_agenda, id_agenda_detalle, metros_planificado, no_trabajadores, no_horas, no_horas_trabajadas,
+	porcentaje, envio_autorizacion, fecha_alta, usuario_alta, estatus
+	)
+	VALUES
+	(
+	#{idAgenda}, #{idAgendaDetalle}, #{metrosPlanificados}, #{noTrabajadores}, #{noHoras}, #{noHorasTrabajadas},
+	#{porcentaje}, 'N', now(), #{usuarioAlta}, 'A'
+	)
+
+	<selectKey keyProperty="idActividadDiaria" resultType="Integer" order="AFTER">
+			SELECT LAST_INSERT_ID();
+	</selectKey>
+</insert>
+
+<insert id="registroActividadDiariaDetalle" parameterType="java.util.HashMap">
+	INSERT INTO actividad_diaria_detalle
+	(
+	id_actividad_diaria, codigo_actividad, codigo_prioridad, codigo_estado, planeada,
+	fecha_alta, usuario_alta, estatus
+	)
+	VALUES
+	(
+	#{id_actividad_diaria}, #{codigo_actividad}, #{codigo_prioridad}, #{codigo_estado}, #{planeada},
+	now(), #{usuario_alta}, 'A'
+	)
+</insert>
+
+<delete id="eliminaActividadesDiarias" parameterType="java.util.HashMap">
+DELETE FROM actividad_diaria
+WHERE id_agenda_detalle = #{id_agenda_detalle}
+</delete>
+
+<insert id="altaActividadDiariaDetalle" parameterType="ActividadDiariaDetalle">
+	INSERT INTO actividad_diaria_detalle
+	(
+	id_actividad_diaria, codigo_actividad, codigo_prioridad, codigo_estado,codigo_listo_vencido,tiempo_destinado,
+	numero_personas,numero_unidades,porcentaje,observaciones, planeada,fecha_alta, usuario_alta, estatus
+	)
+	VALUES
+	(
+	#{idActividadDiaria}, #{codigoActividad}, #{codigoPrioridad}, #{codigoEstado}, #{codigoListoVencido}, #{tiempoDestinado},
+	#{numeroPersonas}, #{numeroUnidades}, #{porcentaje}, #{observaciones}, #{planeada}, now(), #{usuarioAlta},'A'
+	)
+</insert>
+
+<update id="actualizaActividadDiariaDetalle" parameterType="ActividadDiariaDetalle">
+	UPDATE actividad_diaria_detalle SET
+			codigo_prioridad = #{codigoPrioridad},
+			codigo_estado = #{codigoEstado},
+			codigo_listo_vencido = #{codigoListoVencido},
+			tiempo_destinado = #{tiempoDestinado},
+			numero_personas = #{numeroPersonas},
+			numero_unidades = #{numeroUnidades},
+			porcentaje = #{porcentaje},
+			observaciones = #{observaciones},
+			fecha_ult_mod = now(),
+			usuario_ult_mod = #{usuarioUltMod}
+	WHERE id_actividad_diaria = #{idActividadDiaria}
+	AND codigo_actividad = #{codigoActividad}
+	AND estatus = 'A'
+</update>
+<insert id="altaActividadDiariaDocumentos" parameterType="ActividadDiariaDocumentos">
+	INSERT INTO actividad_diaria_documentos
+	(
+	 	id_actividad_diaria,codigo_actividad,
+	 	consecutivo
+	 	,url,usuario_alta,fecha_alta,estatus
+	)
+	VALUES
+	(
+		#{idActividadDiaria},#{codigoActividad}, 
+		(SELECT ifnull(max(a.consecutivo),0) + 1 FROM actividad_diaria_documentos a WHERE a.id_actividad_diaria = #{idActividadDiaria} AND a.codigo_actividad = #{codigoActividad})
+		,#{url},#{usuarioAlta},now(),'A'
+	)
+</insert>
+
+<update id="autorizaActividadDiariaBuzon" parameterType="ActividadDiariaCampo">
+	UPDATE actividad_diaria SET
+		autorizacion = #{autorizacion},
+		fecha_autorizacion = now(),
+		usuario_autorizacion = #{usuarioAutorizacion},
+		comentario_autorizacion = #{comentarioAutorizacion},
+		no_horas_trabajadas =  #{noHorasTrabajadas},
+		porcentaje  = #{porcentajeHoras}
+	WHERE id_actividad_diaria = #{idAgendaDetalle}
+</update>
+
+<update id="bajaActividadDiariaDetalle" parameterType="ActividadDiariaDetalle">
+	DELETE actividad_diaria_detalle
+	WHERE id_actividad_diaria = #{idActividadDiaria}
+	AND codigo_actividad = #{codigoActividad}
+	AND estatus = 'A'
+</update>
+
+
+<delete id="eliminaActividadDiariaCoordenadas" parameterType="ActividadDiariaCampo">
+	DELETE FROM actividad_diaria_coordenadas
+	WHERE id_actividad_diaria = #{idActividadDiaria}
+</delete>
+
+<update id="terminaCapturaActividadCampo" parameterType="ActividadDiariaCampo">
+	UPDATE actividad_diaria SET
+		envio_autorizacion = 'S',
+		envio_fecha_autorizacion = now(),
+		envio_usuario_autorizacion = #{envioUsuarioAutorizacion},
+		observaciones	= #{observaciones}
+	WHERE id_actividad_diaria = #{idActividadDiaria}
+</update>
+
+<insert id="registraAgendaCoordenadaCampo" parameterType="ActividadDiariaCoordenadas">
+INSERT INTO actividad_diaria_coordenadas
+		(
+			id_actividad_diaria,	orden,	direccion,
+			latitud,	longitud, usuario_alta,fecha_alta,	estatus
+		)
+	VALUES
+	 	(
+			#{idActividadDiaria}, #{orden},	#{direccion},
+			#{latitud},	#{longitud},#{usuarioAlta}, now(),'A'
+	 	)
+</insert>
+</mapper>

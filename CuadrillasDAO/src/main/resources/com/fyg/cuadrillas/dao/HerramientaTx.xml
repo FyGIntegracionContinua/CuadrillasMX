@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.fyg.cuadrillas.dao.HerramientaTx">
+
+	<!--- ALTA EN LA TABLA HERRAMIENTA-->
+	<insert id="registraHerramienta" parameterType="herramienta">
+		INSERT INTO herramienta
+		(
+		   id_herramienta, nombre, descripcion, fecha_ingresa, codigo_tipo_articulo, codigo_estado,
+		   marca, modelo, no_serie, usuario_alta, fecha_alta, estatus
+		)
+		VALUES
+		(
+			#{idHerramienta}, upper(#{nombre}), upper(#{descripcion}), now(), upper(#{codigoTipo}), upper(#{codigoEstatus}),
+			upper(#{marca}), #{modelo}, #{noSerie} , #{usuarioAlta}, now(), 'A'
+		)
+
+	</insert>
+
+	<!--- BAJA EN LA TABLA TIPO CATALOGO-->
+	<update id="inactivaHerramienta" parameterType="herramienta">
+	UPDATE herramienta SET
+		estatus = 'I',
+		usuario_ult_mod = #{usuarioUltMod},
+		fecha_ult_mod = now()
+	WHERE id_herramienta = #{idHerramienta}
+	AND estatus = 'A'
+
+	</update>
+
+	<update id="actualizaHerramienta" parameterType="herramienta">
+		UPDATE herramienta
+		SET
+			nombre = upper(#{nombre}),
+			descripcion = upper(#{descripcion}),
+			codigo_tipo_articulo =  upper(#{codigoTipo}),
+			codigo_estado =  upper(#{codigoEstatus}),
+			marca = upper(#{marca}),
+			modelo = #{modelo},
+			no_serie =  #{noSerie},
+			fecha_ult_mod = now(),
+			usuario_ult_mod = #{usuarioAlta}
+		WHERE id_herramienta = #{idHerramienta}
+	</update>
+</mapper>

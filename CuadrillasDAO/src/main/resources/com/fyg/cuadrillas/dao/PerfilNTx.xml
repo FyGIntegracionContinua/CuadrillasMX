@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.fyg.cuadrillas.dao.PerfilNTx">
+<resultMap type="Perfil" id="perfil">
+<result column="id_perfil" property="idPerfil"/>
+<result column="codigo_puesto" property="codigoPuesto"/>
+</resultMap>
+
+	<!-- Consulta Perfil-->
+<select id="consultaPerfil" parameterType="Perfil" resultMap="perfil">
+SELECT id_perfil,codigo_puesto FROM perfil
+<where>
+	 <if test="idPerfil !=null">
+	 	id_perfil = #{idPerfil}
+	 </if>
+	 <if test="codigoPuesto !=null">
+	 	codigo_puesto = #{codigoPuesto}
+	 </if>
+</where>
+</select>
+</mapper>

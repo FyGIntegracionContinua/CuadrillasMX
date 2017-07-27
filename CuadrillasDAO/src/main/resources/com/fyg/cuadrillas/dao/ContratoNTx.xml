@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.ContratoNTx">
+
+<resultMap type="Contrato" id="contrato">
+	<result column="id_contrato" property="idContrato"/>
+	<result column="codigo_vialidad" property="codigoVialidad"/>
+	<result column="codigo_contrato" property="codigoContrato"/>
+	<result column="codigo_documento" property="codigoDocumento"/>
+	<result column="codigo_empresa" property="codigoEmpresa"/>
+	<result column="numero_documento" property="numeroDocumento"/>
+	<result column="monto" property="monto"/>
+	<result column="subtotal" property="subtotal"/>
+	<result column="fecha_inicio" property="fechaInicio"/>
+	<result column="fecha_fin" property="fechaFin"/>
+	<result column="dias_duracion" property="diasDuracion"/>
+	<result column="pct_avance" property="pctAvance"/>
+	<result column="fecha_registro" property="fechaRegistro"/>
+	<result column="id_cuadrilla" property="idCuadrilla"/>
+	<result column="observaciones" property="observaciones"/>
+	<result column="url" property="url"/>
+	<result column="metros" property="metros"/>
+	<result column="estatus" property="estatus"/>
+	<result column="usuarioAlta" property="estatus"/>
+	<result column="numero_personas" property="numeroPersonas"/>
+	<result column="horas_totales" property="horasTotales"/>
+	<result column="id_empleado_residente" property="idEmpleadoResidente"/>
+	<result column="nombre_residente" property="nombreResidente"/>
+	<result column="descripcion_vialidad" property="descripcionVialidad"/>
+	<result column="nombre_cuadrilla" property="nombreCuadrilla"/>
+	<result column="calificacion_cuadrilla" property="calificacionCuadrilla"/>
+	<result column="fecha_registro_contrato" property="fechaRegistroContrato"/>
+	<result column="fecha_actual" property="fechaActual"/>
+</resultMap>
+
+<resultMap type="Coordenada" id="coordenada">
+	<result column="id_contrato" property="idContrato"/>
+	<result column="orden" property="orden"/>
+	<result column="direccion" property="direccion"/>
+	<result column="latitud" property="latitud"/>
+	<result column="longitud" property="longitud"/>
+</resultMap>
+
+<resultMap type="ContratoDocumento" id="contratoDocumento">
+	<result column="id_ontrato" property="idContrato"/>
+	<result column="id_documento" property="idDocumento"/>
+	<result column="nombre" property="nombre"/>
+	<result column="codigo_documento" property="codigoDocumento"/>
+	<result column="url" property="url"/>
+	<result column="fecha_alta" property="fechaAlta"/>
+	<result column="descripcion_documento" property="descripcionDocumento"/>
+</resultMap>
+
+<select id="existeContrato" parameterType="Contrato" resultType="int">
+	SELECT count(*)
+	FROM contrato
+	WHERE 1 = 1
+	<if test="idContrato !=null">
+	 	AND id_contrato = #{idContrato}
+	</if>
+	<if test="numeroDocumento !=null">
+	 	AND numero_documento = #{numeroDocumento}
+	</if>
+	<if test="codigoDocumento !=null">
+	 	AND codigo_documento = #{codigoDocumento}
+	</if>
+	AND estatus = 'A'
+</select>
+
+<select id="existeBajaContrato" parameterType="Contrato" resultType="int">
+	SELECT count(estatus) AS estatus
+	FROM contrato
+	WHERE id_contrato = #{idContrato}
+	AND estatus = 'I'
+</select>
+
+<select id="consultaContrato" parameterType="Contrato" resultMap="contrato">
+
+	SELECT
+		id_contrato,
+		codigo_vialidad,
+		codigo_contrato,
+		codigo_documento,
+		codigo_empresa,
+		numero_documento,
+		monto,
+		subtotal,
+		fecha_inicio,
+		fecha_fin,
+		dias_duracion,
+		pct_avance,
+		fecha_registro AS fecha_registro_contrato,
+		id_cuadrilla,
+		observaciones,
+		url,
+		metros,
+		usuario_alta,
+		fecha_alta,
+		usuario_baja,
+		fecha_baja,
+		usuario_ult_mod,
+		fecha_ult_mod,
+		estatus
+	FROM contrato
+	WHERE estatus = 'A'
+	<if test="idContrato !=null">
+	 	AND id_contrato = #{idContrato}
+	</if>
+</select>
+
+<select id="consultaContratoCoordenadas" parameterType="Contrato" resultMap="coordenada">
+	SELECT
+		id_coordenada,
+		id_contrato,
+		orden,
+		direccion,
+		latitud,
+		longitud,
+		fecha_alta,
+		estatus
+	FROM contrato_coordenadas
+	WHERE estatus = 'A'
+	<if test="idContrato !=null">
+	 	AND id_contrato = #{idContrato}
+	</if>
+	order by orden
+</select>
+
+<select id="contratoActivo" parameterType="Contrato" resultMap="contrato">
+SELECT
+co.id_contrato,
+co.codigo_vialidad,
+co.codigo_contrato,
+co.codigo_documento,
+co.codigo_empresa,
+co.numero_documento,
+co.monto,
+co.subtotal,
+co.fecha_inicio,
+co.fecha_fin,
+co.dias_duracion,
+co.pct_avance,
+co.fecha_registro,
+co.id_cuadrilla,
+co.observaciones,
+co.url,
+co.metros,
+co.usuario_alta,
+co.fecha_alta,
+co.usuario_baja,
+co.fecha_baja,
+co.usuario_ult_mod,
+co.fecha_ult_mod,
+co.estatus,
+DATE(NOW()) AS fecha_actual,
+ca.descripcion AS descripcion_vialidad,
+cua.nombre_cuadrilla AS nombre_cuadrilla,
+cua.calificacion  AS calificacion_cuadrilla,
+er.id_empleado AS id_empleado_residente,
+CONCAT(er.nombre, ' ', er.apellido_pat, ' ', er.apellido_mat )  AS nombre_residente,
+(SELECT count(*) FROM empleado  where id_cuadrilla = cua.id_cuadrilla AND estatus = 'A')  AS numero_personas,
+(SELECT count(*) FROM empleado  where id_cuadrilla = cua.id_cuadrilla AND estatus = 'A') * #{horaLaboral} AS horas_totales
+FROM contrato co
+LEFT JOIN cuadrilla cua	ON cua.id_cuadrilla = co.id_cuadrilla
+LEFT JOIN catalogo ca ON co.codigo_vialidad = ca.codigo
+LEFT JOIN empleado er ON er.id_cuadrilla = cua.id_cuadrilla AND er.estatus = 'A' AND er.codigo_puesto = 'RESI'
+WHERE co.estatus = 'A'
+</select>
+
+<select id="consultaContratoDocumento" parameterType="Contrato" resultMap="contrato">
+SELECT id_contrato,url FROM contrato WHERE id_contrato = #{idContrato} AND estatus = 'A'
+</select>
+
+<select id="consultaDocumentosCon" parameterType="ContratoDocumento" resultMap="contratoDocumento">
+SELECT co.id_documento,co.id_contrato,co.nombre,co.codigo_documento,co.estatus,co.fecha_alta,
+cat.descripcion AS descripcion_documento
+FROM contrato_documentos co
+LEFT JOIN catalogo cat ON cat.codigo = co.codigo_documento
+WHERE co.id_contrato = #{idContrato}
+</select>
+
+<select id="documentosContrac" parameterType="ContratoDocumento" resultMap="contratoDocumento">
+SELECT url FROM contrato_documentos
+WHERE id_documento = #{idDocumento}
+</select>
+</mapper>

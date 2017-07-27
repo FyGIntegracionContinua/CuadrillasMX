@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+<typeAliases>
+	<typeAlias alias="Prueba" type="com.fyg.cuadrillas.dto.PruebaDTO"/>
+	<typeAlias alias="Parametro" type="com.fyg.cuadrillas.dto.ParametroDTO"/>
+	<typeAlias alias="Perfil" type="com.fyg.cuadrillas.dto.PerfilDTO"/>
+	<typeAlias alias="Usuario" type="com.fyg.cuadrillas.dto.usuario.UsuarioDTO"/>
+	<typeAlias alias="Catalogo" type="com.fyg.cuadrillas.dto.catalogo.CatalogoDTO"/>
+	<typeAlias alias="TipoCatalogo" type="com.fyg.cuadrillas.dto.catalogo.TipoCatalogoDTO"/>
+	<typeAlias alias="Herramienta" type="com.fyg.cuadrillas.dto.herramienta.HerramientaDTO"/>
+	<typeAlias alias="Empleado" type="com.fyg.cuadrillas.dto.empleado.EmpleadoDTO"/>
+	<typeAlias alias="Menu" type="com.fyg.cuadrillas.dto.menu.MenuDTO"/>
+	<typeAlias alias="EmpleadoDocumento" type="com.fyg.cuadrillas.dto.empleado.EmpleadoDocumentoDTO"/>
+	<typeAlias alias="EmpleadoHuella" type="com.fyg.cuadrillas.dto.empleado.EmpleadoHuellaDTO"/>
+	<typeAlias alias="Vialidad" type="com.fyg.cuadrillas.dto.vialidad.VialidadDTO"/>
+	<typeAlias alias="Asistencia" type="com.fyg.cuadrillas.dto.asistencia.AsistenciaDTO"/>
+	<typeAlias alias="Contrato" type="com.fyg.cuadrillas.dto.contrato.ContratoDTO"/>
+	<typeAlias alias="Cuadrilla" type="com.fyg.cuadrillas.dto.cuadrilla.CuadrillaDTO"/>
+	<typeAlias alias="Permiso" type="com.fyg.cuadrillas.dto.empleado.PermisoLaboralDTO"/>
+	<typeAlias alias="Actividad" type="com.fyg.cuadrillas.dto.actividad.ActividadDTO"/>
+	<typeAlias alias="Coordenada" type="com.fyg.cuadrillas.dto.CoordenadaDTO"/>
+	<typeAlias alias="Buzon" type="com.fyg.cuadrillas.dto.buzon.BuzonDTO"/>
+	<typeAlias alias="Agenda" type="com.fyg.cuadrillas.dto.agenda.AgendaDTO"/>
+	<typeAlias alias="AgendaDetalle" type="com.fyg.cuadrillas.dto.agenda.AgendaDetalleDTO"/>
+	<typeAlias alias="ContratoDocumento" type="com.fyg.cuadrillas.dto.contrato.ContratoDocumentoDTO"/>
+	<typeAlias alias="AgendaActividad" type="com.fyg.cuadrillas.dto.agenda.AgendaActividadDTO"/>
+	<typeAlias alias="AgendaMaterial" type="com.fyg.cuadrillas.dto.agenda.AgendaMaterialDTO"/>
+	<typeAlias alias="ActividadDiaria" type="com.fyg.cuadrillas.dto.actividad.ActividadDiariaDTO"/>
+	<typeAlias alias="ActividadDiariaCampo" type="com.fyg.cuadrillas.dto.actividad.ActividadDiariaCampoDTO"/>
+	<typeAlias alias="ActividadDiariaDetalle" type="com.fyg.cuadrillas.dto.actividad.ActividadDiariaDetalleDTO"/>
+	<typeAlias alias="ActividadDiariaDocumentos" type="com.fyg.cuadrillas.dto.actividad.ActividadDiariaDocumentosDTO"/>
+	<typeAlias alias="ActividadDiariaCoordenadas" type="com.fyg.cuadrillas.dto.actividad.ActividadDiariaCoordenadasDTO"/>
+</typeAliases>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="poolMaximumCheckoutTime" value="5000"/>
+                <property name="poolTimeToWait" value="10000"/>
+                <property name="poolMaximumIdleConnections" value="5"/>
+                <property name="poolMaximumActiveConnections" value="50"/>
+				<property name="driver" value="com.mysql.jdbc.Driver"/>
+				<property name="url" value="jdbc:mysql://localhost:3306/tatei"/>
+				<property name="username" value="cuadrillas"/>
+				<property name="password" value="cuadrillasFyG"/>
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+	<mapper resource="com/fyg/cuadrillas/dao/CatalogoNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/HerramientaNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/ParametroNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/PerfilNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/UsuarioNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/EmpleadoNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/MenuNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/VialidadNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/AsistenciaNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/ContratoNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/CuadrillaNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/PermisoNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/BuzonNTx.xml" />
+	<mapper resource="com/fyg/cuadrillas/dao/AgendaNTx.xml" />
+	</mappers>
+</configuration>

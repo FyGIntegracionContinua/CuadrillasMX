@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es-mx">
+	<head>
+    	<title> Toma de Asistencia</title>
+    	<meta charset="utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+    	<style>
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+
+th, td {
+    border: none;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+</style>   	    	   
+  	</head>
+  	<body ng-app="tatei">
+  	<div class="container">
+	<h2>Buz&oacute;n Oficina Central</h2>
+		<div class="panel panel-default">
+		<div id="success" class="alert alert-success alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()"  data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>AVISO!</strong> <span id="msgaviso"></span>
+                  </div>
+                  <div id="alert" class="alert alert-danger alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()" data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>ATENCI&Oacute;N!</strong> <span id="msgerror"></span>
+                  </div>
+			<div class="panel-body">
+			<form name="form_reloj" id="formEmpleado">
+			    <div class="row">
+			         <div class="col-sm-12">
+			         <div align="center"><input class="btn btn-info btn-primary" type="submit" value="Actualizar" ng-click="actualizaTareas()"></div>
+			         <br>
+			         <br>
+                		<div style="overflow-x:auto;">
+                			<table>
+                				<tr class="success">
+                				<td><b>Fecha</b></td>
+                				<td><b>Tarea</b></td>
+                				<td><b>Ejecutar</b></td>
+                				</tr>
+                				<tr ng-repeat="tareas in resultado">
+                				<td>{{tareas.fechaTarea}}</td>
+                			    <td>{{tareas.descripcion}}</td>
+                			    <td ng-if="tareas.tipoTarea === 'IMSS'" align="center"><input type="image" src="images/Go.png" style="width: 26px; height: 24px; "  ng-click="notificar(tareas)"/></td>
+                			    <td ng-if="tareas.tipoTarea === 'PELA'" align="center"><input type="image" src="images/Go.png" style="width: 26px; height: 24px; "  ng-click="autorizar(tareas)"/></td>
+                			    <td ng-if="tareas.tipoTarea === 'ACDI'" align="center"><input type="image" src="images/Go.png" style="width: 26px; height: 24px; "  ng-click="autorizarActividad(tareas)"/></td>
+                				</tr>
+                			</table>
+                		</div>
+                	</div>
+			    </div>
+			    
+			    
+			</form>
+			</div>
+		</div>
+</div>
+
+
+</body>
+</html>

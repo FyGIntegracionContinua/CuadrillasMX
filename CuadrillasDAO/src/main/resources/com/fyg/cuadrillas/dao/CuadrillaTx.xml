@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.CuadrillaTx">
+
+<insert id="altaCuadrilla" parameterType="Cuadrilla">
+INSERT INTO cuadrilla(id_cuadrilla,nombre_cuadrilla,codigo_vialidad,calificacion,fecha_alta,usuario_alta,estatus)
+VALUES(#{idCuadrilla},#{nombreCuadrilla},#{codigoVialidad},#{calificacion},now(),#{usuarioAlta},'A')
+</insert>
+
+<update id="bajaCuadrilla" parameterType="Cuadrilla">
+UPDATE cuadrilla SET
+fecha_baja = now(),
+usuario_baja = #{usuarioBaja},
+fecha_ult_mod = now(),
+usuario_ult_mod = #{usuarioUltMod},
+estatus = 'I'
+WHERE id_cuadrilla = #{idCuadrilla}
+AND estatus = 'A'
+</update>
+
+<update id="modificaCuadrilla" parameterType="Cuadrilla">
+UPDATE cuadrilla SET
+		fecha_ult_mod = now(),
+		usuario_ult_mod = #{usuarioUltMod},
+		nombre_cuadrilla = #{nombreCuadrilla},
+		codigo_vialidad = #{codigoVialidad},
+		calificacion = #{calificacion}
+WHERE id_cuadrilla = #{idCuadrilla}
+AND estatus = 'A'
+</update>
+</mapper>

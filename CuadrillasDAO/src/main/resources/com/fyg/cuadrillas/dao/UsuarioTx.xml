@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.fyg.cuadrillas.dao.UsuarioTx">
+<!--- INSERTA EN LA TABLA USUARIO-->
+<insert id="insertaUsuario" parameterType="Usuario">
+INSERT INTO usuario(usuario,id_empleado,nombre,apellido_pat,apellido_mat,sexo,rfc,rfc_calculado,fecha_nacimiento,id_perfil,contrasena,cambio_contrasena,fecha_ult_acceso,fecha_alta,fecha_ult_mod,estatus)
+VALUES(#{usuario},#{idEmpleado},#{nombre},#{apellidoPat},#{apellidoMat},#{sexo},#{rfc},#{rfcCalculado},#{fechaNacimiento},#{idPerfil},#{contrasena},'N',now(),now(),now(),'A')
+</insert>
+
+<!--- BAJA EN LA TABLA USUARIO-->
+
+<update id="inactivaUsuario" parameterType="Usuario">
+UPDATE usuario SET
+estatus = #{estatus},
+fecha_ult_mod = now()
+WHERE usuario = #{usuario}
+</update>
+
+<update id="modificaContrasena" parameterType="Usuario">
+UPDATE usuario SET
+contrasena = #{contrasenaNueva},
+cambio_contrasena = 'S'
+WHERE id_empleado = #{idEmpleado}
+AND estatus ='A'
+</update>
+</mapper>

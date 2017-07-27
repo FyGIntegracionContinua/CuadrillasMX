@@ -1,0 +1,58 @@
+<div class="container">
+<div id="success" class="alert alert-success alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()"  data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>AVISO!</strong> <span id="msgaviso"></span>
+                  </div>
+                  <div id="alert" class="alert alert-danger alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()" data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>ATENCI&Oacute;N!</strong> <span id="msgerror"></span>
+                  </div>
+				<h2>Cambio de Contrase&ntilde;a</h2>
+				<br>
+				<div class="panel panel-default">
+					<div class="panel-body">
+					<div ng-repeat="user in resultadoEmpleado">
+ 				<b>Nombre:</b> {{user.nombre}} {{user.apellidoPat}} {{user.apellidoMat}} 
+				&nbsp <b>Perfil:</b> {{user.nombrePerfil}}
+				</div>
+				<form ng-submit="actualizar(user)" name="cambioContra" novalidate>
+				 <br>
+				 
+				 <div class="row" ng-class="{ 'has-error' : cambioContra.contraAnterior.$invalid && !cambioContra.contraAnterior.$pristine }" >
+				   <div class="col-md-7 col-md-offset-3" >
+				   <label for="cuadrilla" class="control-label">*Contrase&ntilde;a Anterior:</label>
+				 <input type="password" id="contraAnterior" requiered class="form-control " name="contraAnterior" ng-model="user.conAnterior" required size="7">
+				 <p ng-show="cambioContra.contraAnterior.$invalid && !cambioContra.contraAnterior.$pristine" class="help-block">El necesaria la contrase&ntilde;a anterior.</p>
+				   </div>
+				 
+				 </div>
+				 
+				 <div class="row" ng-class="{ 'has-error' : cambioContra.contraNueva.$invalid && !cambioContra.contraNueva.$pristine }">
+				 <div class="col-md-7 col-md-offset-3"  >
+				 <label for="cuadrilla" class="control-label">*Contrase&ntilde;a Nueva:</label>
+				 <input type="password" id="contraNueva" requiered class="form-control" name="contraNueva" required ng-model="user.nueva" ng-minlength="8" ng-pattern="/^.*[0-9]+.*$/">
+				 
+				 <p ng-if="cambioContra.contraNueva.$error.minlength == true" ng-show="cambioContra.contraNueva.$error.minlength" class="help-block">La contrase&ntilde;a nueva no debe ser menos de 8 caracteres.</p>
+				 <p ng-if="cambioContra.contraNueva.$error.pattern == true" ng-show="cambioContra.contraNueva.$error.pattern" class="help-block">La contrase&ntilde;a debe tener almenos un numero.</p>
+				 </div>
+				 </div>
+				 
+				 <div class="row" ng-class="{ 'has-error' : cambioContra.repetirContra.$invalid && !cambioContra.repetirContra.$pristine }">
+				 <div class="col-md-7 col-md-offset-3"  >
+				 <label for="cuadrilla" class="control-label">*Repetir Contrase&ntilde;a Nueva:</label>
+				 <input type="password"  id="repetirContraNueva" required class="form-control" name="repetirContra" ng-model="user.repetirNueva" ng-minlength="8"  ng-pattern="/^.*[0-9]+.*$/">
+				 <p ng-if="cambioContra.repetirContra.$error.minlength == true" ng-show="cambioContra.repetirContra.$error.minlength" class="help-block">La contrase&ntilde;a no debe ser menos de 8 caracteres.</p>
+				 <p ng-if="cambioContra.repetirContra.$error.pattern == true" ng-show="cambioContra.repetirContra.$error.pattern" class="help-block">La contrase&ntilde;a debe tener almenos un numero.</p>
+				 </div>
+				 </div>
+				 <br>
+				 <div align="center">
+				 <input type="submit" value="Limpiar" class="btn botonLimpiar"  ng-click="reset(user)">
+				 <input type="submit" value="Actualizar Contrase&ntilde;a" class="btn botonGuardar" ng-disabled="cambioContra.$invalid">
+				 </div>
+				
+				</form>
+					</div>
+				</div>
+				
+		</div>

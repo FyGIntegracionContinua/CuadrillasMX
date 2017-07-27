@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.EmpleadoTx">
+
+<!-- Registra en la tabla Empleado -->
+<insert id="registraEmpleado" parameterType="empleado" useGeneratedKeys="true" keyProperty="id_empleado"  keyColumn="id_empleado">
+	INSERT INTO empleado
+		(
+		no_empleado, nombre, apellido_pat, apellido_mat, sexo, rfc, rfc_calculado, fecha_nacimiento,
+		fecha_ingreso, codigo_empresa,codigo_puesto, codigo_vialidad, codigo_area, codigo_talla,id_cuadrilla, sueldo,calificacion,frecuencia_pago,
+		nss, no_credito_infonavit, telefono, observaciones, usuario_alta, fecha_alta,
+		usuario_ult_mod, fecha_ult_mod, estatus, alta_imss
+		)
+	VALUES
+		(
+		upper(#{noEmpleado}), upper(#{nombre}), upper(#{apellidoPat}), upper(#{apellidoMat}), upper(#{sexo}), upper(#{rfc}), upper(#{rfcCalculado}), #{fechaNacimiento},
+		now(),#{codigoEmpresa}, #{codigoPuesto}, #{codigoVialidad}, #{codigoArea}, #{codigoTalla},#{idCuadrilla},#{sueldo},#{calificacion},#{frecuenciaPago},
+		#{nss},#{noCreditoInfonavit}, #{telefono}, #{observaciones}, #{usuarioAlta}, now(),
+		 #{usuarioAlta}, now(), 'A', #{altaImss}
+		)
+	<selectKey keyProperty="idEmpleado" resultType="Integer" order="AFTER">
+	SELECT LAST_INSERT_ID();
+	</selectKey>
+</insert>
+
+<insert id="registraDocumentos" parameterType="empleadoDocumento">
+	INSERT INTO empleado_documentos
+		(
+		id_empleado, codigo_emp_doc, fecha_alta, estatus
+		)
+	VALUES
+	<foreach collection="list" item="element" index="index" separator=",">
+	 	(
+	 	#{element.idEmpleado}, #{element.codigoEmpDoc}, now(), #{element.estatus}
+	 	)
+	</foreach>
+</insert>
+
+<update id="bajaEmpleado" parameterType="empleado">
+	UPDATE empleado SET
+	     fecha_baja = now(),
+	     usuario_baja = #{usuarioBaja},
+	     observaciones = #{observaciones},
+	     codigo_tipo_salida = #{codigoTipoSalida},
+	     codigo_causa_salida = #{codigoCausaSalida},
+	     fecha_ult_mod = now(),
+	     estatus = 'I'
+	 WHERE id_empleado = #{idEmpleado}
+</update>
+
+<update id="modificaEmpleado" parameterType="empleado">
+	UPDATE empleado
+	SET
+	   no_empleado = upper(#{noEmpleado}),
+	   nombre = upper(#{nombre}),
+	   apellido_pat = upper(#{apellidoPat}),
+	   apellido_mat = upper(#{apellidoMat}),
+	   fecha_nacimiento = #{fechaNacimiento},
+	   sexo = upper(#{sexo}),
+	   rfc = upper(#{rfc}),
+	   rfc_calculado = upper(#{rfcCalculado}),
+	   codigo_empresa = upper(#{codigoEmpresa}),
+	   codigo_puesto = upper(#{codigoPuesto}),
+	   codigo_vialidad = upper(#{codigoVialidad}),
+	   id_cuadrilla = #{idCuadrilla},
+	   calificacion = #{calificacion},
+	   codigo_area = upper(#{codigoArea}),
+	   codigo_talla = upper(#{codigoTalla}),
+	   sueldo = #{sueldo},
+	   frecuencia_pago =  upper(#{frecuenciaPago}),
+	   nss = #{nss},
+	   alta_imss = #{altaImss},
+	   no_credito_infonavit = #{noCreditoInfonavit},
+	   telefono = #{telefono},
+	   observaciones = #{observaciones},
+	   usuario_ult_mod = #{usuarioAlta},
+	   fecha_ult_mod = now()
+	 WHERE id_empleado = #{idEmpleado}
+
+</update>
+
+<delete id="eliminaDocumentos" parameterType="empleadoDocumento">
+	DELETE FROM empleado_documentos WHERE id_empleado = #{idEmpleado}
+</delete>
+
+<update id="notificaImss" parameterType="empleado">
+ UPDATE empleado SET
+ 		usuario_aut_imss = #{usuarioAutImss},
+ 		fecha_aut_imss = now()
+ WHERE id_empleado = #{idEmpleado}
+</update>
+
+<insert id="registrarHuella" parameterType="empleadoHuella">
+INSERT INTO empleado_huella(id_empleado,huella,codigo_mano,codigo_dedo,estatus)
+VALUES (#{idEmpleado},#{huella},#{codigoMano},#{codigoDedo},'A')
+</insert>
+</mapper>

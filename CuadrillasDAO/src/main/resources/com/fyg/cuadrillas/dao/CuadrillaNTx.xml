@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.CuadrillaNTx">
+
+<resultMap type="Cuadrilla" id="cuadrilla" >
+<result column="id_cuadrilla" property="idCuadrilla"/>
+<result column="nombre_cuadrilla" property="nombreCuadrilla"/>
+<result column="codigo_vialidad" property="codigoVialidad"/>
+<result column="numero_personas" property="numeroPersonas"/>
+<result column="nombre_vialidad" property="nombreVialidad"/>
+<result column="nombre_residente" property="nombreResidente"/>
+<result column="id_empleado_residente" property="idEmpleadoResidente"/>
+</resultMap>
+
+<select id="existeMismaCuadrilla" parameterType="Cuadrilla" resultType="int">
+	SELECT count(nombre_cuadrilla) AS nombre_cuadrilla
+	FROM cuadrilla
+	WHERE nombre_cuadrilla = #{nombreCuadrilla}
+	AND estatus = 'A'
+	<if test="idCuadrilla != null">
+    	AND id_cuadrilla != #{idCuadrilla}
+  	</if>
+</select>
+
+<select id="existeMismaIdCuadrilla" parameterType="Cuadrilla" resultType="int">
+	SELECT count(id_cuadrilla) AS id_cuadrilla
+	FROM cuadrilla
+	WHERE id_cuadrilla = #{idCuadrilla}
+	AND estatus = 'A'
+	<if test="idCuadrilla != null">
+    	AND id_cuadrilla != #{idCuadrilla}
+  	</if>
+</select>
+
+<select id="existeMismaVialidad" parameterType="Cuadrilla" resultType="int">
+	SELECT count(id_cuadrilla) AS id_cuadrilla
+	FROM cuadrilla
+	WHERE codigo_vialidad = #{codigoVialidad}
+	AND estatus = 'A'
+	<if test="idCuadrilla != null">
+    	AND id_cuadrilla != #{idCuadrilla}
+  	</if>
+</select>
+
+<select  id="existeBajaCuadrilla" parameterType="Cuadrilla" resultType="int">
+	SELECT count(estatus) AS estatus
+	FROM cuadrilla
+	WHERE id_cuadrilla = #{idCuadrilla}
+	AND estatus = 'I'
+</select>
+
+<select id="consultaCuadrilla" parameterType="Cuadrilla" resultMap="cuadrilla">
+SELECT c.id_cuadrilla,
+ c.nombre_cuadrilla,
+ c.codigo_vialidad,
+ c.calificacion,
+ c.estatus,ca.descripcion AS nombre_vialidad,
+ count(e.id_empleado) AS numero_personas,
+ er.id_empleado AS id_empleado_residente,
+ CONCAT(er.nombre, ' ', er.apellido_pat, ' ', er.apellido_mat )  AS nombre_residente
+FROM cuadrilla c
+LEFT JOIN empleado e ON e.id_cuadrilla = c.id_cuadrilla AND e.estatus = 'A'
+LEFT JOIN empleado er ON er.id_cuadrilla = c.id_cuadrilla AND er.estatus = 'A' AND er.codigo_puesto = 'RESI'
+LEFT JOIN catalogo ca ON c.codigo_vialidad = ca.codigo
+WHERE c.estatus = 'A'
+GROUP BY c.id_cuadrilla,
+ c.nombre_cuadrilla
+</select>
+</mapper>

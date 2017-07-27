@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.AsistenciaNTx">
+
+<resultMap type="Asistencia" id="asistencia">
+<result column="id_asistencia" property="idAsistencia"/>
+<result column="hora_entrada" property="horaEntrada"/>
+<result column="hora_salida" property="horaSalida"/>
+<result column="nombre" property="nombre"/>
+<result column="perfil_empleado" property="perfilEmpleado"/>
+<result column="nombre" property="nombre"/>
+<result column="apellido_paterno" property="apellidoPaterno"/>
+<result column="apellido_materno" property="apellidoMaterno"/>
+<result column="comentarios" property="comentarios"/>
+<result column="fecha" property="fecha"/>
+<result column="id_empleado" property="idEmpleado"/>
+</resultMap>
+
+<select id="consultaHoraAsistencia" parameterType="Asistencia" resultType="int">
+SELECT count(id_asistencia) 
+FROM asistencia
+WHERE id_empleado = #{idEmpleado}
+AND fecha = DATE(NOW())
+AND estatus = 'A'
+</select>
+
+<select id="existeSalidaAsistencia" parameterType="Asistencia" resultType="int">
+SELECT count(id_asistencia) 
+FROM asistencia
+WHERE id_empleado = #{idEmpleado}
+AND hora_salida IS NOT NULL
+AND fecha = DATE(NOW())
+AND estatus = 'A'
+</select>
+
+<select id="existeBajaAsistencia" parameterType="Asistencia" resultType="int">
+SELECT count(estatus) AS estatus
+FROM asistencia
+WHERE id_empleado = #{idEmpleado}
+AND estatus = 'I'
+</select>
+
+<select id="consultaAsistencia" parameterType="Asistencia" resultMap="asistencia">
+SELECT c.descripcion AS perfil_empleado,
+	   e.nombre AS nombre,
+	   e.apellido_pat AS apellido_paterno,
+	   e.apellido_mat AS apellido_materno,
+	   ae.comentarios AS comentarios,
+	   #{fecha} AS fecha,
+	   ae.hora_entrada AS hora_entrada,
+	   ae.hora_salida AS hora_salida,
+	   e.id_empleado AS id_empleado
+FROM empleado e
+LEFT JOIN catalogo c ON c.codigo = e.codigo_puesto
+LEFT JOIN asistencia ae ON ae.fecha = #{fecha} AND ae.id_empleado = e.id_empleado
+WHERE e.id_cuadrilla = #{idCuadrilla}
+AND e.estatus = 'A'
+ORDER BY e.fecha_ingreso
+</select>
+</mapper>

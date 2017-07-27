@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/botones.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
+<title>Autorizacion Permiso Laboral</title>
+<script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/autorizacion.js"></script>
+<style>
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(3); /* IE */
+  -moz-transform: scale(3); /* FF */
+  -webkit-transform: scale(3); /* Safari and Chrome */
+  -o-transform: scale(3); /* Opera */
+  padding: 10px;
+}
+
+/* Might want to wrap a span around your checkbox text */
+.checkboxtext
+{
+  /* Checkbox text */
+  font-size: 110%;
+  display: inline;
+}
+
+.responsive-input{
+  width: 100%;
+  resize: none;
+}
+</style>
+</head>
+<body ng-app="tatei" ng-controller="autorizacionLaboral">
+<div class="container">
+<!-- Modal -->
+      <div class="modal fade bs-tatei-modal-sm" id="msload" tabindex="-1"
+          role="dialog" aria-hidden="true" data-backdrop="static">
+          <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h4 class="modal-title">
+                          <span class="glyphicon glyphicon-time">
+                          </span>Espera un momento..
+                       </h4>
+                  </div>
+                  <div class="modal-body">
+                      <div class="progress">
+                          <div class="progress-bar progress-bar-info
+                          progress-bar-striped active"
+                          style="width: 100%">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <!-- Modal fin -->
+<div class="panel panel-default">
+		<div class="panel-body">
+		<h2>Autorizacion Permiso Laboral</h2>
+		<div id="success" class="alert alert-success alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()"  data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>AVISO!</strong> <span id="msgaviso"></span>
+                  </div>
+                  <div id="alert" class="alert alert-danger alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()" data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>ATENCI&Oacute;N!</strong> <span id="msgerror"></span>
+                  </div>
+			<form name="form_reloj" id="formPermiso">
+					<div class="row" ng-repeat="empleado in resultado">
+					 <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="numeroEmpleado" class="control-label">Numero de Empleado</label>
+                           <input type="text" id="noEmpleado"  value={{empleado.numeroEmpleado}} disabled class="form-control">
+                        </div>
+                    </div>
+					</div>
+					
+					<div class="row" ng-repeat="emp1 in resultado">
+					 <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="nombre" class="control-label">Nombre</label>
+                           <input type="text"  value={{emp1.nombreEmpleado}}&nbsp{{emp1.apellidoPaterno}}&nbsp{{emp1.apellidoMaterno}} class="form-control" disabled>
+                        </div>
+                    </div>
+					</div>
+			  
+			  <div class="row" ng-repeat="emp2 in resultado">
+			  <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="puesto" class="control-label">Puesto</label>
+                           <input type="text" value={{emp2.descripcionPuesto}} disabled class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fechaIngreso" class="control-label">Fecha de Ingreso</label>
+                            <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input type="date" value={{emp2.fechaEmpleado}} disabled class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+			  </div>
+			  
+			  <div class="row" ng-repeat="coment in resultado">
+			  <div class="col-sm-12">
+                        <div class="form-group form-group-sm">
+                            <label for="comentarios" class="control-label">Comentarios</label>
+                           <textarea id="comentario" class="form-control responsive-input"  disabled >{{coment.comentarios}}</textarea>
+                             <div class="amt_errorComentario"></div>
+                        </div>
+                    </div>
+			  </div>
+			  <div class="row" ng-repeat="asistencia in resultado"> 
+			  <div class="col-sm-4" >
+                        <div class="form-group form-group-sm">
+                            <label for="fechaSolicitud" class="control-label">Fecha de Solicitud</label>
+                           <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input type="date" id="fechaSolicitud" name="fechaSolicitud" disabled value={{asistencia.fechaSolicitud}} class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+			  </div>
+			  
+			  <div class="row" ng-repeat="asis1 in resultado">
+			   <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fechaAusencia" class="control-label">Fecha de Ausencia</label>
+                           <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input type="date" id="fechaSolicitudMinima" disabled value={{asis1.fechaSolicitudMinimo}} class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fechaMaxima" class="control-label">a</label>
+                           <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input type="date" id="fechaSolicitudMaxima" disabled value={{asis1.fechaSolicitudMaximo}} class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+			  </div>
+			  <div class="row" ng-repeat="asis2 in resultado">
+			  <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="horarioSolicitado" class="control-label">Horario Solicitado</label>
+                           <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-clock-o"></i></div>
+                  			<input type="time" id="horaSolicitudMinimo" disabled value={{asis2.horaSolicitudMinimo}} class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fechaMaxima" class="control-label">a</label>
+                           <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-clock-o"></i></div>
+                  		<input type="time" id="horaSolicitudMaxima" disabled value={{asis2.horaSolicitudMaxima}} class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+			  </div>
+			  
+			  <div class="row" ng-repeat="per in resultado">
+			  <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="tipoPermiso" class="control-label">Tipo de Permiso</label>
+                           <input type="text"  disabled value={{per.descripcionPermiso}} class="form-control">
+                        </div>
+                    </div>
+			  </div>
+			  
+			  <div class="row">
+			  <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <span style="font-weight: bold;font-size:17">Goce de Sueldo: &nbsp</span>
+                           <input type="checkbox" id="goce" size="4" ng-model="permiso.goce"><span class="checkboxtext">
+                           &nbsp
+                              </span>
+                        </div>
+                    </div>
+			  </div>
+			  <button type="submit" data-ng-click="aceptar(permiso)" class="btn botonGuardar">Autorizar</button>
+              <button data-ng-click="rechazar(permiso)" class="btn botonBaja" >Rechazar</button>
+			</form>
+		</div>
+</div>
+</div>
+
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+    	<script src="js/bootstrap.min.js"></script>
+    	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+</body>
+</html>

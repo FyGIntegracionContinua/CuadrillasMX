@@ -1,0 +1,749 @@
+package com.fyg.cuadrillas.negocio;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import com.fyg.cuadrillas.comun.EncabezadoRespuesta;
+import com.fyg.cuadrillas.comun.Encriptacion;
+import com.fyg.cuadrillas.comun.ExcepcionesCuadrillas;
+import com.fyg.cuadrillas.comun.GUIDGenerator;
+import com.fyg.cuadrillas.comun.LogHandler;
+import com.fyg.cuadrillas.comun.RFCUtil;
+import com.fyg.cuadrillas.dao.EmpleadoDAO;
+import com.fyg.cuadrillas.dao.ParametroDAO;
+import com.fyg.cuadrillas.dao.PerfilDAO;
+import com.fyg.cuadrillas.dao.UsuarioDAO;
+import com.fyg.cuadrillas.dto.PerfilDTO;
+import com.fyg.cuadrillas.dto.empleado.EmpleadoDTO;
+import com.fyg.cuadrillas.dto.empleado.EmpleadoDocumentoDTO;
+import com.fyg.cuadrillas.dto.empleado.EmpleadoDocumentoRespuesta;
+import com.fyg.cuadrillas.dto.empleado.EmpleadoHuellaDTO;
+import com.fyg.cuadrillas.dto.empleado.EmpleadoHuellaRespuesta;
+import com.fyg.cuadrillas.dto.empleado.EmpleadoRespuesta;
+import com.fyg.cuadrillas.dto.usuario.UsuarioDTO;
+
+public class EmpleadoNegocio {
+
+	/** The LONGITUD_RFC. */
+	private static final  int LONGITUD_RFC = 10;
+	/** The LONGITUD_TELEFONO. */
+	private static final  int LONGITUD_TELEFONO = 10;
+	/**
+	 * Metodo para dar de alta un empleado
+	 * @param empleado recibe valores de empleado
+	 * @return regresa respuesta de baja
+	 */
+	public EncabezadoRespuesta registraEmpleado(EmpleadoDTO empleado) {
+		//Primero generamos el identificador unico de la transaccion
+		String uid = GUIDGenerator.generateGUID(empleado);
+		//Mandamos a log el objeto de entrada
+		LogHandler.debug(uid, this.getClass(), "registraEmpleado - Datos Entrada: " + empleado);
+		//Variable de resultado
+		EncabezadoRespuesta respuesta = new EncabezadoRespuesta();
+		List<PerfilDTO> listaPerfil = null;
+		try {
+			if (empleado.getNoEmpleado() == null || empleado.getNoEmpleado().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El numero de empleado es necesario en el alta del empleado.");
+			}
+			if (empleado.getNombre() == null || empleado.getNombre().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El nombre es necesario en el alta del empleado.");
+			}
+			if (empleado.getApellidoPat() == null || empleado.getApellidoPat().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El apellido paterno es necesario en el alta del empleado.");
+			}
+			if (empleado.getApellidoMat() == null) {
+				empleado.setApellidoMat("");
+			}
+			if (empleado.getSexo() == null || empleado.getSexo().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El sexo es necesario en el alta del empleado.");
+			}
+			if (!(empleado.getSexo().equalsIgnoreCase("F") || empleado.getSexo().equalsIgnoreCase("M"))) {
+				throw new ExcepcionesCuadrillas("El sexo del empleado es incorrecto.");
+			}
+			if (empleado.getRfc() == null || empleado.getRfc().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El RFC es necesario en el alta del empleado.");
+			}
+			if (empleado.getRfc().trim().length() < LONGITUD_RFC) {
+				throw new ExcepcionesCuadrillas("La longitud del RFC debe ser minimo " + LONGITUD_RFC + " caracteres.");
+			}
+			if (empleado.getCodigoEmpresa() == null || empleado.getCodigoEmpresa().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("La empresa es necesaria en el alta del empleado.");
+			}
+			if (empleado.getCodigoPuesto() == null || empleado.getCodigoPuesto().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El puesto es necesario en el alta del empleado.");
+			}
+			 if (empleado.getCodigoArea() == null || empleado.getCodigoArea().isEmpty()) {
+				throw new ExcepcionesCuadrillas("Es necesario el codigo area.");
+			}
+			 if (empleado.getCodigoTalla() == null || empleado.getCodigoTalla().isEmpty()) {
+					throw new ExcepcionesCuadrillas("Es necesario el codigo area.");
+				}
+			if (empleado.getSueldo() <= 0) {
+				throw new ExcepcionesCuadrillas("El sueldo es necesario en el alta del empleado.");
+			}
+			if ( empleado.getTelefono() == null) {
+				empleado.setTelefono("");
+			}
+			if (!empleado.getTelefono().trim().isEmpty()) {
+				if (empleado.getTelefono().trim().length() != LONGITUD_TELEFONO) {
+					throw new ExcepcionesCuadrillas("La longitud del telefono debe ser de " + LONGITUD_TELEFONO + " caracteres.");
+				}
+			}
+
+			if (empleado.getFrecuenciaPago() == null) {
+				empleado.setFrecuenciaPago("");
+			}
+			if (empleado.getDocumentos().size() == 0) {
+			 				throw new ExcepcionesCuadrillas("La lista de documentos es necesaria.");
+			 			}
+			 			for (EmpleadoDocumentoDTO documento : empleado.getDocumentos()) {
+			 				documento.setIdEmpleado(empleado.getIdEmpleado());
+			 				if (documento.getCodigoEmpDoc() == null || documento.getCodigoEmpDoc().trim().isEmpty()) {
+			 					throw new ExcepcionesCuadrillas("El codigo del documento es obligatorio.");
+			 				}
+			 				if (documento.getEstatus() == null || documento.getCodigoEmpDoc().trim().isEmpty()) {
+			 					throw new ExcepcionesCuadrillas("El codigo del documento es obligatorio.");
+			 				}
+			 }
+			if (empleado.getUsuarioAlta() == null || empleado.getUsuarioAlta().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El usuario es necesario en el alta del empleado.");
+			}
+			if (empleado.getCodigoArea() == null || empleado.getCodigoArea().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El area es necesario en el alta del empleado.");
+			}
+			if (empleado.getFechaNacimiento() == null || empleado.getFechaNacimiento().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("La fecha de nacimiento es necesaria en el alta del empleado.");
+			}
+			if (empleado.getNss() == null) {
+				empleado.setNss("");
+			}
+			if (empleado.getNoCreditoInfonavit() == null) {
+				empleado.setNoCreditoInfonavit("");
+			}
+			if (empleado.getObservaciones() == null) {
+				empleado.setObservaciones("");
+			}
+			if (empleado.getCodigoPuesto().trim().equals("OFCE")) {
+				empleado.setIdCuadrilla(0);
+			}
+			 SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+		     String strFecha = empleado.getFechaNacimiento();
+		     Date fechaDate = formato.parse(strFecha);
+		     //validacion fecha
+		     Calendar fechaNac = Calendar.getInstance();
+		     Calendar fechaActual = Calendar.getInstance();
+		     fechaNac.setTime(fechaDate);
+		     // se resta para sacar Edad
+		     int year = fechaActual.get(Calendar.YEAR) - fechaNac.get(Calendar.YEAR);
+		     int mes = fechaActual.get(Calendar.MONTH) - fechaNac.get(Calendar.MONTH);
+		     int dia = fechaActual.get(Calendar.DATE) - fechaNac.get(Calendar.DATE);
+		     if (mes < 0 || (mes == 0 && dia < 0)) {
+		           year--;
+		     }
+		     //se llama el parametro
+		     String parametroEdad = "usuario.edad.ano.minimo";
+			 String valor = new ParametroDAO().consultaParametro(uid, parametroEdad);
+			 Integer edadMinima = Integer.parseInt(valor);
+			 System.out.println(edadMinima + " - " + year);
+			 if (year < edadMinima) {
+				 throw new ExcepcionesCuadrillas("El empleado debe tener 18 años o mas.");
+			 }
+			//RFC Calculado
+			String rfcCalculado  = RFCUtil.calcularRFCPersonaFisica(empleado.getNombre(),
+						empleado.getApellidoPat(),
+						empleado.getApellidoMat(),
+						fechaDate);
+			//Se le asigna el rfc calculado al campo rfc_calculado de usuarios
+			empleado.setRfcCalculado(rfcCalculado);
+			EmpleadoDAO dao = new EmpleadoDAO();
+			empleado.setCodigoVialidad("");
+			//Consultamos si ya existe
+			respuesta = dao.registraEmpleado(uid, empleado);
+
+			if (!respuesta.isEstatus()) {
+				throw new Exception(respuesta.getMensajeFuncional());
+			}
+
+			//Aqui generamos usuario si el perfil existe en perfil.crea.usuario
+			UsuarioDTO usuarioExistente = new UsuarioDTO();
+			UsuarioDTO usuario = new UsuarioDTO();
+			String parametroUsuario = "perfil.crea.usuario";
+			String valorResultado = new ParametroDAO().consultaParametro(uid, parametroUsuario);
+			String delimiter = ";";
+			String[] temp;
+			temp = valorResultado.split(delimiter);
+			boolean crearUsuario = false;
+			for (int i = 0; i < temp.length; i++) {
+				if (temp[i].equals(empleado.getCodigoPuesto())) {
+					crearUsuario = true;
+				}
+			}
+			//Creamos usuario en BD para el sistema
+			if (crearUsuario) {
+				//Validamos que existe perfil
+				PerfilDTO perfilUsuario = new PerfilDTO();
+				perfilUsuario.setCodigoPuesto(empleado.getCodigoPuesto());
+				listaPerfil = new PerfilDAO().consultaPerfil(uid, perfilUsuario);
+				if (listaPerfil.size() == 0) {
+					 throw new ExcepcionesCuadrillas("No Existe Perfil Configurado en el Sistema.");
+				}
+				//Buscamos usuario disponible
+				String nombreEmpleado = empleado.getNombre().trim();
+				boolean generaUsuario = false;
+				for (int j = 0; j < nombreEmpleado.length(); j++) {
+					String sUsuario = "";
+					char letraNombre = empleado.getNombre().charAt(j);
+					sUsuario += letraNombre + empleado.getApellidoPat();
+					sUsuario = sUsuario.toLowerCase();
+					usuario.setUsuario(sUsuario);
+					usuarioExistente = new UsuarioDAO().consultaUsuarioExistente(uid, usuario);
+					if (usuarioExistente == null) {
+						generaUsuario = true;
+						break;
+					}
+				}
+				if (!generaUsuario) {
+					 throw new ExcepcionesCuadrillas(
+							 "No es posible generar el usuario contacte al Administrador del Sistema.");
+				}
+				//Damos de alta el usuario
+				String encriptaContrasena = Encriptacion.obtenerEncriptacionSHA256(usuario.getUsuario());
+				//Se le asigna la contrasena encriptada
+				usuario.setContrasena(encriptaContrasena);
+				usuario.setIdEmpleado(empleado.getIdEmpleado());
+				usuario.setNombre(empleado.getNombre());
+				usuario.setApellidoPat(empleado.getApellidoPat());
+				usuario.setApellidoMat(empleado.getApellidoMat());
+				usuario.setRfc(empleado.getRfc());
+				usuario.setSexo(empleado.getSexo());
+				usuario.setRfcCalculado(rfcCalculado);
+				usuario.setIdPerfil(listaPerfil.get(0).getIdPerfil());
+				usuario.setFechaNacimiento(empleado.getFechaNacimiento());
+				//se le envian los datos al DAO
+				UsuarioDAO daoUsuario = new UsuarioDAO();
+				daoUsuario.altaUsuario(uid, usuario);
+				respuesta.setMensajeFuncional(respuesta.getMensajeFuncional() + " Usuario Generado: " + usuario.getUsuario());
+			}
+		}
+		catch  (ExcepcionesCuadrillas ex) {
+			LogHandler.error(uid, this.getClass(), "registraEmpleado - Error: " + ex.getMessage(), ex);
+			respuesta.setUid(uid);
+			respuesta.setEstatus(false);
+			respuesta.setMensajeFuncional(ex.getMessage());
+			respuesta.setMensajeTecnico(ex.getMessage());
+		}
+		catch  (Exception ex) {
+			LogHandler.error(uid, this.getClass(), "registraEmpleado - Error: " + ex.getMessage(), ex);
+			respuesta.setUid(uid);
+			respuesta.setEstatus(false);
+			respuesta.setMensajeFuncional(ex.getMessage());
+			respuesta.setMensajeTecnico(ex.getMessage());
+		}
+		LogHandler.debug(uid, this.getClass(), "registraEmpleado- Datos Salida: " + respuesta);
+		return respuesta;
+}
+	/**
+	 * Metodo para dar de baja un empleado
+	 * @param empleado recibe valores de empleado
+	 * @return regresa respuesta de baja
+	 */
+	public EncabezadoRespuesta bajaEmpleado(EmpleadoDTO empleado) {
+		//Primero generamos el identificador unico de la transaccion
+		String uid = GUIDGenerator.generateGUID(empleado);
+		//Mandamos a log el objeto de entrada
+		LogHandler.debug(uid, this.getClass(), "bajaEmpleado- Datos Entrada: " + empleado);
+		//Variable de resultado
+		EncabezadoRespuesta respuesta = new EncabezadoRespuesta();
+		EmpleadoDTO emp = null;
+		try {
+
+			if (empleado.getIdEmpleado() == null || empleado.getIdEmpleado().intValue() <= 0) {
+				throw new ExcepcionesCuadrillas("El No de empleado es necesario para la baja.");
+			}
+			if (empleado.getCodigoTipoSalida() == null || empleado.getCodigoTipoSalida().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El tipo de salida es necesario para la baja.");
+			}
+			if (empleado.getCodigoCausaSalida() == null || empleado.getCodigoCausaSalida().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("La causa de la salida es necesario para la baja.");
+			}
+			if (empleado.getUsuarioBaja() == null || empleado.getUsuarioBaja().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El Usuario es necesario para la baja.");
+			}
+
+			empleado.setNombre(null);
+			empleado.setApellidoPat(null);
+			empleado.setApellidoMat(null);
+			EmpleadoDAO dao = new EmpleadoDAO();
+			//Validaciones Negocio
+			emp = dao.consultaEmpleado(uid, empleado);
+
+			if (emp == null) {
+				throw new ExcepcionesCuadrillas("El empleado solicitado no existe.");
+			}
+
+			if (emp.getEstatus().equals("I")) {
+				throw new ExcepcionesCuadrillas("El empleado ya se encuentra dado de baja.");
+			}
+
+	        respuesta = dao.bajaEmpleado(uid, empleado);
+
+		}
+		catch  (ExcepcionesCuadrillas ex) {
+			LogHandler.error(uid, this.getClass(), "bajaEmpleado - Error: " + ex.getMessage(), ex);
+			respuesta.setUid(uid);
+			respuesta.setEstatus(false);
+			respuesta.setMensajeFuncional(ex.getMessage());
+			respuesta.setMensajeTecnico(ex.getMessage());
+		}
+		catch  (Exception ex) {
+			LogHandler.error(uid, this.getClass(), "bajaEmpleado - Error: " + ex.getMessage(), ex);
+			respuesta.setUid(uid);
+			respuesta.setEstatus(false);
+			respuesta.setMensajeFuncional(ex.getMessage());
+			respuesta.setMensajeTecnico(ex.getMessage());
+		}
+		LogHandler.debug(uid, this.getClass(), "bajaEmpleado - Datos Salida: " + respuesta);
+		return respuesta;
+}
+	/**
+	 * Metodo para modificar empleado
+	 * @param empleado recibe valores de empleado
+	 * @return regresa una respuesta
+	 */
+	public EncabezadoRespuesta modificaEmpleado(EmpleadoDTO empleado) {
+		//Primero generamos el identificador unico de la transaccion
+		String uid = GUIDGenerator.generateGUID(empleado);
+		//Mandamos a log el objeto de entrada
+		LogHandler.debug(uid, this.getClass(), "modificaEmpleado- Datos Entrada: " + empleado);
+		//Variable de resultado
+		EncabezadoRespuesta respuesta = new EncabezadoRespuesta();
+		try {
+			if (empleado.getIdEmpleado() == null || empleado.getIdEmpleado().intValue() <= 0) {
+				throw new ExcepcionesCuadrillas("El No de empleado es necesario para la actualizacion.");
+			}
+			if (empleado.getNombre() == null || empleado.getNombre().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El nombre es necesario en la actualizacion del empleado.");
+			}
+			if (empleado.getApellidoPat() == null || empleado.getApellidoPat().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El apellido paterno es necesario en la actualizacion del empleado.");
+			}
+			if (empleado.getApellidoMat() == null) {
+				empleado.setApellidoMat("");
+			}
+			if (empleado.getSexo() == null || empleado.getSexo().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El sexo es necesario en la actualizacion del empleado.");
+			}
+			if (!(empleado.getSexo().equalsIgnoreCase("F") || empleado.getSexo().equalsIgnoreCase("M"))) {
+				throw new ExcepcionesCuadrillas("El sexo del empleado es incorrecto.");
+			}
+			if (empleado.getRfc() == null || empleado.getRfc().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El RFC es necesario en la actualizacion del empleado.");
+			}
+			if (empleado.getRfc().trim().length() < LONGITUD_RFC) {
+				throw new ExcepcionesCuadrillas("La longitud del RFC debe ser minimo " + LONGITUD_RFC + " caracteres.");
+			}
+			if (empleado.getCodigoEmpresa() == null || empleado.getCodigoEmpresa().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("La empresa es necesaria en la actualizacion del empleado.");
+			}
+			if (empleado.getCodigoPuesto() == null || empleado.getCodigoPuesto().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El puesto es necesario en la actualizacion del empleado.");
+			}
+			if (empleado.getCodigoArea() == null || empleado.getCodigoArea().isEmpty()) {
+				throw new ExcepcionesCuadrillas("Es necesario el codigo area en la actualizacion del empleado.");
+			}
+			if (empleado.getSueldo() <= 0) {
+				throw new ExcepcionesCuadrillas("El sueldo es necesario en en la actualizacion del empleado. del empleado.");
+			}
+			if ( empleado.getTelefono() == null) {
+				empleado.setTelefono("");
+			}
+			if (!empleado.getTelefono().trim().isEmpty()) {
+				if (empleado.getTelefono().trim().length() != LONGITUD_TELEFONO) {
+					throw new ExcepcionesCuadrillas("La longitud del telefono debe ser de " + LONGITUD_TELEFONO + " caracteres.");
+				}
+			}
+			if (empleado.getFrecuenciaPago() == null) {
+				empleado.setFrecuenciaPago("");
+			}
+			if (empleado.getDocumentos().size() == 0) {
+ 				throw new ExcepcionesCuadrillas("La lista de documentos es necesaria.");
+ 			}
+ 			for (EmpleadoDocumentoDTO documento : empleado.getDocumentos()) {
+ 				documento.setIdEmpleado(empleado.getIdEmpleado());
+ 				if (documento.getCodigoEmpDoc() == null || documento.getCodigoEmpDoc().trim().isEmpty()) {
+ 					throw new ExcepcionesCuadrillas("El codigo del documento es obligatorio.");
+ 				}
+ 				if (documento.getEstatus() == null || documento.getCodigoEmpDoc().trim().isEmpty()) {
+ 					throw new ExcepcionesCuadrillas("El codigo del documento es obligatorio.");
+ 				}
+ 			}
+			if (empleado.getUsuarioAlta() == null || empleado.getUsuarioAlta().trim().isEmpty()) {
+				throw new ExcepcionesCuadrillas("El usuario es necesario en en la actualizacion del empleado.");
+			}
+			if (empleado.getNss() == null) {
+				empleado.setNss("");
+			}
+			if (empleado.getNoCreditoInfonavit() == null) {
+				empleado.setNoCreditoInfonavit("");
+			}
+			if (empleado.getObservaciones() == null) {
+				empleado.setObservaciones("");
+			}
+			if (empleado.getCodigoPuesto().trim().equals("OFCE")) {
+				empleado.setIdCuadrilla(0);
+			}
+			SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+		     String strFecha = empleado.getFechaNacimiento();
+		     Date fechaDate = formato.parse(strFecha);
+		     //validacion fecha
+		     Calendar fechaNac = Calendar.getInstance();
+		     Calendar fechaActual = Calendar.getInstance();
+		     fechaNac.setTime(fechaDate);
+		     // se resta para sacar Edad
+		     int year = fechaActual.get(Calendar.YEAR) - fechaNac.get(Calendar.YEAR);
+		     int mes = fechaActual.get(Calendar.MONTH) - fechaNac.get(Calendar.MONTH);
+		     int dia = fechaActual.get(Calendar.DATE) - fechaNac.get(Calendar.DATE);
+		     if (mes < 0 || (mes == 0 && dia < 0)) {
+		           year--;
+		     }
+		     //se llama el parametro
+		     String parametroEdad = "usuario.edad.ano.minimo";
+			 String valor = new ParametroDAO().consultaParametro(uid, parametroEdad);
+			 Integer edadMinima = Integer.parseInt(valor);
+			 if (year < edadMinima) {
+				 throw new ExcepcionesCuadrillas("El empleado debe tener 18 años o mas.");
+			 }
+			//RFC Calculado
+			String rfcCalculado  = RFCUtil.calcularRFCPersonaFisica(empleado.getNombre(),
+						empleado.getApellidoPat(),
+						empleado.getApellidoMat(),
+						fechaDate);
+			//Se le asigna el rfc calculado al campo rfc_calculado de usuarios
+			empleado.setRfcCalculado(rfcCalculado);
+			EmpleadoDAO dao = new EmpleadoDAO();
+			empleado.setCodigoVialidad("");
+			//Modificacion
+ 		    respuesta = dao.modificaEmpleado(uid, empleado);
+		}
+		catch  (Exception ex) {
+			LogHandler.error(uid, this.getClass(), "modificaEmpleado - Error: " + ex.getMessage(), ex);
+			respuesta.setUid(uid);
+			respuesta.setEstatus(false);
+			respuesta.setMensajeFuncional(ex.getMessage());
+			respuesta.setMensajeTecnico(ex.getMessage());
+		}
+		LogHandler.debug(uid, this.getClass(), "modificaEmpleado - Datos Salida: " + respuesta);
+		return respuesta;
+}
+	/**
+	 * Metodo para consultar empleados
+	 * @param empleado recibe valores de empleados
+	 * @return regresa lista de empleado
+	 */
+	public EmpleadoRespuesta consultaEmpleado(EmpleadoDTO empleado) {
+		//Primero generamos el identificador unico de la transaccion
+		String uid = GUIDGenerator.generateGUID(empleado);
+		//Mandamos a log el objeto de entrada
+		LogHandler.debug(uid, this.getClass(), "consultaEmpleado - Datos Entrada: " + empleado);
+		//Variable de resultado
+		EmpleadoRespuesta respuesta = new EmpleadoRespuesta();
+		respuesta.setHeader( new EncabezadoRespuesta());
+		respuesta.getHeader().setUid(uid);
+		respuesta.getHeader().setEstatus(true);
+		respuesta.getHeader().setMensajeFuncional("Consulta correcta.");
+
+		List<EmpleadoDTO> listaEmpleado = null;
+
+	    try {
+	    	if (empleado.getIdEmpleado() == null)
+	    	{
+	    		throw new ExcepcionesCuadrillas("Es necesario el id del empleado para la busqueda.");
+	    	}
+	    	 listaEmpleado = new EmpleadoDAO().consultaGeneral(uid, empleado);
+	    	 respuesta.setEmpleado(listaEmpleado);
+	    } catch  (ExcepcionesCuadrillas ex) {
+			LogHandler.error(uid, this.getClass(), "ConsultaEmpleado - Error: " + ex.getMessage(), ex);
+			respuesta.getHeader().setEstatus(false);
+			respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+			respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+		} catch (Exception ex) {
+	    	LogHandler.error(uid, this.getClass(), "ConsultaEmpleado - Error: " + ex.getMessage(), ex);
+	    	respuesta.getHeader().setEstatus(false);
+			respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+			respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+	    }
+	    LogHandler.debug(uid, this.getClass(), "consultaEmpleado - Datos Salida: " + respuesta);
+	    return respuesta;
+	}
+	/**
+	 * Devuelve lista general de empleados sin consultar ID
+	 * @return regresa lista de empleado
+	 * @throws Exception si se crea un error
+	 */
+	public EmpleadoRespuesta consultaGeneral() throws Exception {
+				//Primero generamos el identificador unico de la transaccion
+				String uid = GUIDGenerator.generateGUID(new String(""));
+				//Mandamos a log el objeto de entrada
+				LogHandler.debug(uid, this.getClass(), "consultaGeneral - Daton Entrada: ");
+				EmpleadoRespuesta respuesta = new EmpleadoRespuesta();
+				respuesta.setHeader( new EncabezadoRespuesta());
+				respuesta.getHeader().setUid(uid);
+				respuesta.getHeader().setEstatus(true);
+				respuesta.getHeader().setMensajeFuncional("Consulta correcta.");
+				List<EmpleadoDTO> listaEmpleado = null;
+				try {
+					listaEmpleado = new EmpleadoDAO().consultaGeneralEmpleado(uid);
+					respuesta.setEmpleado(listaEmpleado);
+				} catch  (ExcepcionesCuadrillas ex) {
+					LogHandler.error(uid, this.getClass(), "consultaGeneral - Error: " + ex.getMessage(), ex);
+					respuesta.getHeader().setEstatus(false);
+					respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+					respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+				} catch (Exception ex) {
+			    	LogHandler.error(uid, this.getClass(), "consultaGeneral - Error: " + ex.getMessage(), ex);
+			    	respuesta.getHeader().setEstatus(false);
+					respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+					respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+			    }
+			    LogHandler.debug(uid, this.getClass(), "consultaGeneral - Datos Salida: " + respuesta);
+				return respuesta;
+	}
+	/**
+	 * Metodo para consultar los documentos
+	 * @param empleadoDocumento recibe valores de los docs
+	 * @return regresa lista de documentos
+	 */
+	public EmpleadoDocumentoRespuesta consultaDocumento(EmpleadoDocumentoDTO empleadoDocumento) {
+		//Primero generamos el identificador unico de la transaccion
+		String uid = GUIDGenerator.generateGUID(empleadoDocumento);
+		//Mandamos a log el objeto de entrada
+		LogHandler.debug(uid, this.getClass(), "consultaDocumento - Datos Entrada: " + empleadoDocumento);
+		//Variable de resultado
+		EmpleadoDocumentoRespuesta respuesta = new EmpleadoDocumentoRespuesta();
+		respuesta.setHeader( new EncabezadoRespuesta());
+		respuesta.getHeader().setUid(uid);
+		respuesta.getHeader().setEstatus(true);
+		respuesta.getHeader().setMensajeFuncional("Consulta correcta.");
+
+		List<EmpleadoDocumentoDTO> listaDocumento = null;
+
+	    try {
+	    	if (empleadoDocumento.getIdEmpleado() == null)
+	    	{
+	    		throw new ExcepcionesCuadrillas("Es necesario el id del empleado para la busqueda.");
+	    	}
+	    	 listaDocumento = new EmpleadoDAO().consultaDocumentos(uid, empleadoDocumento);
+	    	 respuesta.setEmpleadoDocumento(listaDocumento);
+	    } catch  (ExcepcionesCuadrillas ex) {
+			LogHandler.error(uid, this.getClass(), "consultaDocumento - Error: " + ex.getMessage(), ex);
+			respuesta.getHeader().setEstatus(false);
+			respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+			respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+		} catch (Exception ex) {
+	    	LogHandler.error(uid, this.getClass(), "consultaDocumento - Error: " + ex.getMessage(), ex);
+	    	respuesta.getHeader().setEstatus(false);
+			respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+			respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+	    }
+	    LogHandler.debug(uid, this.getClass(), "consultaDocumento - Datos Salida: " + respuesta);
+	    return respuesta;
+	}
+	/**
+	 * Metodo para consultar los colaboradores
+	 * @param empleado recibe parametros de empleado
+	 * @return regresa lista de colaboradores
+	 */
+	public EmpleadoRespuesta consultaColaborador(EmpleadoDTO empleado) {
+		//Primero generamos el identificador unico de la transaccion
+				String uid = GUIDGenerator.generateGUID(empleado);
+				//Mandamos a log el objeto de entrada
+				LogHandler.debug(uid, this.getClass(), "consultaColaborador - Datos Entrada: " + empleado);
+				//Variable de resultado
+				EmpleadoRespuesta respuesta = new EmpleadoRespuesta();
+				respuesta.setHeader( new EncabezadoRespuesta());
+				respuesta.getHeader().setUid(uid);
+				respuesta.getHeader().setEstatus(true);
+				respuesta.getHeader().setMensajeFuncional("Consulta correcta.");
+
+				List<EmpleadoDTO> listaColaborador = null;
+
+			    try {
+			    	if (empleado.getIdCuadrilla() == null)
+			    	{
+			    		throw new ExcepcionesCuadrillas("Es necesario el id de la cuadrilla para la busqueda.");
+			    	}
+			    	listaColaborador = new EmpleadoDAO().consultaColaborador(uid, empleado);
+			    	respuesta.setEmpleado(listaColaborador);
+			    } catch  (ExcepcionesCuadrillas ex) {
+					LogHandler.error(uid, this.getClass(), "consultaColaborador - Error: " + ex.getMessage(), ex);
+					respuesta.getHeader().setEstatus(false);
+					respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+					respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+				} catch (Exception ex) {
+			    	LogHandler.error(uid, this.getClass(), "consultaColaborador - Error: " + ex.getMessage(), ex);
+			    	respuesta.getHeader().setEstatus(false);
+					respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+					respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+			    }
+			    LogHandler.debug(uid, this.getClass(), "consultaColaborador - Datos Salida: " + respuesta);
+			    return respuesta;
+	}
+	/**
+	 * Metodo para notificar al imss
+	 * @param empleado recibe valores del usuario
+	 * @return regresa una respuesta
+	 */
+	public EncabezadoRespuesta notificaImss(EmpleadoDTO empleado) {
+		//Primero generamos el identificador unico de la transaccion
+				String uid = GUIDGenerator.generateGUID(empleado);
+				//Mandamos a log el objeto de entrada
+				LogHandler.debug(uid, this.getClass(), "notificaImss - Datos Entrada: " + empleado);
+				//Variable de resultado
+				EncabezadoRespuesta respuesta = new EncabezadoRespuesta();
+				try {
+					if (empleado.getIdEmpleado() == null || empleado.getIdEmpleado().intValue() <= 0) {
+						throw new ExcepcionesCuadrillas("El ID de empleado es necesario para la notificación al imss.");
+					}
+					if (empleado.getUsuarioAutImss() == null || empleado.getUsuarioAutImss().trim().isEmpty()) {
+						throw new ExcepcionesCuadrillas("Es necesario el usuario para la notificacion al imss.");
+					}
+					EmpleadoDAO dao = new EmpleadoDAO();
+					respuesta = dao.notificaImss(uid, empleado);
+				} catch  (ExcepcionesCuadrillas ex) {
+					LogHandler.error(uid, this.getClass(), "registraEmpleado - Error: " + ex.getMessage(), ex);
+					respuesta.setUid(uid);
+					respuesta.setEstatus(false);
+					respuesta.setMensajeFuncional(ex.getMessage());
+					respuesta.setMensajeTecnico(ex.getMessage());
+				}
+				catch  (Exception ex) {
+					LogHandler.error(uid, this.getClass(), "registraEmpleado - Error: " + ex.getMessage(), ex);
+					respuesta.setUid(uid);
+					respuesta.setEstatus(false);
+					respuesta.setMensajeFuncional(ex.getMessage());
+					respuesta.setMensajeTecnico(ex.getMessage());
+				}
+				LogHandler.debug(uid, this.getClass(), "registraEmpleado- Datos Salida: " + respuesta);
+				return respuesta;
+	}
+	/**
+	 * Devuelve lista general de empleados sin consultar ID WS
+	 * @return regresa lista de empleado
+	 * @throws Exception si se crea un error
+	 */
+	public EmpleadoRespuesta consultaGeneralWS() throws Exception {
+				//Primero generamos el identificador unico de la transaccion
+				String uid = GUIDGenerator.generateGUID(new String(""));
+				//Mandamos a log el objeto de entrada
+				LogHandler.debug(uid, this.getClass(), "consultaGeneral - Daton Entrada: ");
+				EmpleadoRespuesta respuesta = new EmpleadoRespuesta();
+				respuesta.setHeader( new EncabezadoRespuesta());
+				respuesta.getHeader().setUid(uid);
+				respuesta.getHeader().setEstatus(true);
+				respuesta.getHeader().setMensajeFuncional("Consulta correcta.");
+				List<EmpleadoDTO> listaEmpleado = null;
+						try {
+							listaEmpleado = new EmpleadoDAO().consultaGeneralEmpleadoWS(uid);
+							respuesta.setEmpleado(listaEmpleado);
+						} catch  (ExcepcionesCuadrillas ex) {
+							LogHandler.error(uid, this.getClass(), "consultaGeneral - Error: " + ex.getMessage(), ex);
+							respuesta.getHeader().setEstatus(false);
+							respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+							respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+						} catch (Exception ex) {
+					    	LogHandler.error(uid, this.getClass(), "consultaGeneral - Error: " + ex.getMessage(), ex);
+					    	respuesta.getHeader().setEstatus(false);
+							respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+							respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+					    }
+					    LogHandler.debug(uid, this.getClass(), "consultaGeneral - Datos Salida: " + respuesta);
+						return respuesta;
+	}
+	/**
+	 * Metodo para registrar las huellas
+	 * @param empleadoHuella recibira valores de empleado y huella
+	 * @return regresara respuesta
+	 */
+	public EncabezadoRespuesta registrarHuella(EmpleadoHuellaDTO empleadoHuella) {
+				//Primero generamos el identificador unico de la transaccion
+				String uid = GUIDGenerator.generateGUID(empleadoHuella);
+				//Mandamos a log el objeto de entrada
+				LogHandler.debug(uid, this.getClass(), "registraEmpleado - Datos Entrada: " + empleadoHuella);
+				//Variable de resultado
+				EncabezadoRespuesta respuesta = new EncabezadoRespuesta();
+				try {
+					if (empleadoHuella.getIdEmpleado() == null) {
+						throw new ExcepcionesCuadrillas("Es necesario el id del empleado.");
+					}
+					if (empleadoHuella.getCodigoMano() == null || empleadoHuella.getCodigoMano().trim().isEmpty()) {
+						throw new ExcepcionesCuadrillas("Es necesario el codigo de la huella.");
+					}
+					if (empleadoHuella.getCodigoDedo() == null || empleadoHuella.getCodigoDedo().trim().isEmpty()) {
+						throw new ExcepcionesCuadrillas("Es necesario el codigo de la mano.");
+					}
+					if (empleadoHuella.getHuella() == null || empleadoHuella.getHuella().trim().isEmpty()) {
+						throw new ExcepcionesCuadrillas("Es necesario la ruta de la huella.");
+					}
+					EmpleadoDAO dao = new EmpleadoDAO();
+					//Consultamos si ya existe
+					respuesta = dao.registrarHuella(uid, empleadoHuella);
+				} catch  (ExcepcionesCuadrillas ex) {
+					LogHandler.error(uid, this.getClass(), "registraEmpleado - Error: " + ex.getMessage(), ex);
+					respuesta.setUid(uid);
+					respuesta.setEstatus(false);
+					respuesta.setMensajeFuncional(ex.getMessage());
+					respuesta.setMensajeTecnico(ex.getMessage());
+				}
+				catch  (Exception ex) {
+					LogHandler.error(uid, this.getClass(), "registraEmpleado - Error: " + ex.getMessage(), ex);
+					respuesta.setUid(uid);
+					respuesta.setEstatus(false);
+					respuesta.setMensajeFuncional(ex.getMessage());
+					respuesta.setMensajeTecnico(ex.getMessage());
+				}
+				LogHandler.debug(uid, this.getClass(), "registraEmpleado- Datos Salida: " + respuesta);
+				return respuesta;
+	}
+/**
+ * Metodo para consultar las huellas del empleado
+ * @param empleadoHuella recibira valores de huella
+ * @return regresara respuesta
+ */
+	public EmpleadoHuellaRespuesta consultaHuella(EmpleadoHuellaDTO empleadoHuella) {
+		//Primero generamos el identificador unico de la transaccion
+		String uid = GUIDGenerator.generateGUID(empleadoHuella);
+		//Mandamos a log el objeto de entrada
+		LogHandler.debug(uid, this.getClass(), "consultaHuella - Datos Entrada: " + empleadoHuella);
+		//Variable de resultado
+		EmpleadoHuellaRespuesta respuesta = new EmpleadoHuellaRespuesta();
+		respuesta.setHeader( new EncabezadoRespuesta());
+		respuesta.getHeader().setUid(uid);
+		respuesta.getHeader().setEstatus(true);
+		respuesta.getHeader().setMensajeFuncional("Consulta correcta.");
+
+		List<EmpleadoHuellaDTO> huella = null;
+
+	    try {
+	    	if (empleadoHuella.getIdEmpleado() == null)
+	    	{
+	    		throw new ExcepcionesCuadrillas("Es necesario el id del empleado para la busqueda.");
+	    	}
+	    	huella = new EmpleadoDAO().consultaHuella(uid, empleadoHuella);
+	    	respuesta.setEmpleadoHuella(huella);
+	    } catch  (ExcepcionesCuadrillas ex) {
+			LogHandler.error(uid, this.getClass(), "consultaHuella - Error: " + ex.getMessage(), ex);
+			respuesta.getHeader().setEstatus(false);
+			respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+			respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+		} catch (Exception ex) {
+	    	LogHandler.error(uid, this.getClass(), "consultaHuella - Error: " + ex.getMessage(), ex);
+	    	respuesta.getHeader().setEstatus(false);
+			respuesta.getHeader().setMensajeFuncional(ex.getMessage());
+			respuesta.getHeader().setMensajeTecnico(ex.getMessage());
+	    }
+	    LogHandler.debug(uid, this.getClass(), "consultaHuella - Datos Salida: " + respuesta);
+	    return respuesta;
+	}
+}

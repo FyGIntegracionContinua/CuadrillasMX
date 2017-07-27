@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
+<title>Autorizacion Actividades Diarias</title>
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="css/botones.css"/>
+<script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/autorizaActividad.js"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRhFISVoNopLoDLd5dTHlgVjEgLvKPokc&libraries=geometry"></script> <!-- &callback=initMap -->
+
+<style>
+.set-width {
+  width: 220px;
+}
+
+.separador {border: 2; border-top: 1px solid #999; border-bottom: 1px solid #333; height:0;}
+</style>
+</head>
+<body ng-app="tatei" ng-controller="autorizaActividad">
+		<div class="container">
+		<!-- Modal -->
+      <div class="modal fade bs-tatei-modal-sm" id="msload" tabindex="-1"
+          role="dialog" aria-hidden="true" data-backdrop="static">
+          <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h4 class="modal-title">
+                          <span class="glyphicon glyphicon-time">
+                          </span>Espera un momento..
+                       </h4>
+                  </div>
+                  <div class="modal-body">
+                      <div class="progress">
+                          <div class="progress-bar progress-bar-info
+                          progress-bar-striped active"
+                          style="width: 100%">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <!-- Modal fin -->
+		<h2>Autorización de Actividades Diarias</h2>
+		<div id="success" class="alert alert-success alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()"  data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>AVISO!</strong> <span id="msgaviso"></span>
+                  </div>
+                  <div id="alert" class="alert alert-danger alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()" data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>ATENCI&Oacute;N!</strong> <span id="msgerror"></span>
+                  </div>
+		<div class="row">
+		<div class="col-sm-6">
+                        <div class="form-group form-group-sm">
+                            <label for="Vialidad" class="control-label">Vialidad</label>
+                            <input type="text" name="vialidad" id="vialidad" class="form-control" disabled value="{{actividad.descripcionVialidad}}">
+                        </div>
+                    </div>
+			     <div class="col-sm-6">
+                        <div class="form-group form-group-sm">
+                            <label for="residente" class="control-label">Residente</label>
+                            <input type="text" name="residente" id="residente" class="form-control" disabled value={{actividad.nombreResidente}}>
+                        </div>
+                    </div>
+		</div>
+		
+		<div class="row">
+		 			<div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fecha" class="control-label">Fecha</label>
+                            <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input class="form-control" type="date" name="fecha" id="fecha" value={{actividad.fechaActividad}} disabled/>
+               				 </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="noPersonas" class="control-label">Num. Personas</label>
+                            <input type="text" name="personas" id="personas" class="form-control" value={{actividad.noTrabajadores}} disabled/>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="horasHombre" class="control-label">Total Hrs. Hombre</label>
+                            <input type="text" name="horasHombre" id="horasHombre" class="form-control" value={{actividad.noHoras}} disabled/>
+                        </div>
+                    </div>
+		</div>
+		<br>
+		<div class="row">
+		<div class="panel-group">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" href="#collapse1" ng-click="showMap(actividad)">Avance Esperado (Planificado)</a>
+        </h4>
+      </div>
+      <div id="collapse1" class="panel-collapse collapse">
+        <div class="panel-body">  
+        <!-- mapa -->
+        				<div class="row">
+	                        			<div class="col-sm-3">
+	                          				<span id="txtkm"></span>
+	                        			</div>
+	                        			<div class="col-sm-9">
+	                          				<span id="km"></span>
+	                        			</div>
+	                     </div>
+				        <div class="row">
+				        <div class="col-sm-12">
+				         <div class="table-responsive">
+				            <table class="table table-bordered">
+				            <thead>
+				             <tr class="success">
+				             <td colspan="2">Direccion</td>
+				             </tr>
+				            </thead>
+				            <tr id="tramos">
+	                        </tr>
+				            </table>
+            			</div>
+				        </div>
+				        </div>
+	                <div class="row">
+	                 <div class="col-sm-12">
+	                      			<div id="map" style="width:100%; height:300px"></div>
+	                 </div>
+	                </div>
+	                
+	               
+                <!-- fin nuevo -->
+             </div>
+      </div>
+    </div>
+  </div>
+		
+		<div class="panel-group">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" href="#collapse2" ng-click="mostrarReal(actividad)">Avance Real</a>
+        </h4>
+      </div>
+      <div id="collapse2" class="panel-collapse collapse">
+        <div class="panel-body">  
+        <!-- mapa -->
+	                <!-- mapa -->
+        				<div class="row">
+	                        			<div class="col-sm-3">
+	                          				<span id="txtkm2"></span>
+	                        			</div>
+	                        			<div class="col-sm-9">
+	                          				<span id="km2"></span>
+	                        			</div>
+	                     </div>
+				        <div class="row">
+				        <div class="col-sm-12">
+				         <div class="table-responsive">
+				            <table class="table table-bordered">
+				            <thead>
+				             <tr class="success">
+				             <td colspan="2">Direccion</td>
+				             </tr>
+				            </thead>
+				            <tr id="tramos2">
+	                        </tr>
+				            </table>
+            			</div>
+				        </div>
+				        </div>
+	                <div class="row">
+	                 <div class="col-sm-12">
+	                      			<div id="map2" style="width:100%; height:300px"></div>
+	                 </div>
+	                </div>
+                <!-- fin nuevo -->
+             </div>
+      </div>
+    </div>
+  </div>
+		</div>
+		
+		<div class="row">
+		 <div class="col-sm-12">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+            <thead>
+                <tr class="success">
+                <td>Actividad</td>
+                <td>Prioridad</td>
+                <td>Estado</td>
+                <td>Tiempo destinado a la actividad</td>
+                <td>Numero de Personas destinadas a la actividad</td>
+                <td>Numero de unidades de medida según actividad (m2 pieza)</td>
+                <td>% Completado</td>
+                <td>Listo / Vencido</td>
+                <td>Observaciones</td>
+                <td>Operaciones</td>
+                </tr>
+            </thead>
+            
+            <tr ng-repeat="actividades in actividad.actividadDiariaDetalle">
+            <td>{{actividades.descripcionActividad}}</td>
+            <td>{{actividades.descripcionPrioridad}}</td>
+            <td>{{actividades.descripcionEstado}}</td>
+            <td>{{actividades.tiempoDestinado}}</td>
+            <td>{{actividades.numeroPersonas}}</td>
+            <td>{{actividades.numeroUnidades}}</td>
+            <td>{{actividades.porcentaje}}</td>
+            <td>{{actividades.descripcionListoVencido}}</td>
+            <td>{{actividades.observaciones}}</td>
+            <td><button class="btn btn-warning" ng-click="muestraDocumento(actividades)">Ver Fotos</button></td>
+            </tr>
+            </table>
+           </div>
+         </div>
+		</div>
+	<br>
+		<div class="row">
+		
+		<div class="col-sm-4">
+        <label>Total Hrs Trabajadas:</label>
+		<input type="text" disabled size="5" value={{actividad.noHorasTrabajadas}}> <input type="text" disabled size="5" value={{actividad.porcentaje}}>
+        </div>
+        
+		<div class="col-sm-4">
+		<label>% Actividades completadas:</label>
+		<input type="text" disabled size="5">
+		</div>
+		<br>
+		<div class="row" id="tablaDocumentos">
+		 <div class="col-sm-12">
+		 <h3>Fotos Evidencia</h3>
+          <div class="table-responsive">
+            <table class="table table-bordered">
+            <thead>
+                <tr class="success">
+                <td>Actividad</td>
+                <td>Documento</td>
+                <td>Operaciones</td>
+                </tr>
+            </thead>
+            <tr ng-repeat="documento in documentos">
+            <td>{{documento.descripcionActividad}}</td>
+            <td>{{documento.url}}</td>
+            <td align="center"><button class="btn botonEditar" ng-click="visualizaFoto(documento)">Ver Documento</button></td>
+
+            
+            </tr>
+            </table>
+           </div>
+           </div>
+		
+		</div>
+		
+		<br>
+		<div class="row">
+					<div class="col-sm-4">
+					<label>Horas Restantes:</label>
+					<input type="text" size="7" disabled>
+					</div>
+					
+					<div class="col-sm-4">
+					<label>% Actividades del dia: </label>
+					<input type="text" size="7" disabled>
+					</div>
+					
+		</div>
+		<br>
+		<div class="row">
+				<div class="col-sm-12">
+				<label>Observaciones</label>
+			     <textarea class="form-control" disabled>{{actividad.observaciones}}</textarea>
+				</div>
+		</div>
+		<br>
+		<hr class="separador">
+		<div class="row">
+		<h3>Resultado Revisión</h3>
+				<div class="col-sm-12">
+				<label>Observaciones</label>
+			     <textarea class="form-control" id="comentarioActividad"></textarea>
+				</div>
+			
+		</div>
+		<br>
+		<div class="btn-group" role="group" align="center">
+			
+				<button class="btn botonGuardar" ng-click="autorizarActividad(actividad)">Autorizar</button>&nbsp;<button class="btn btn-danger" ng-click="rechazarActividad(actividad)">Rechazar</button>
+		</div>
+		</div>
+		</div>
+</body>
+</html>

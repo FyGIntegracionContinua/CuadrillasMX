@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
+<title>Baja de Empleado</title>
+<style>
+.responsive-input{
+  width: 100%;
+  resize: none;
+}
+
+body { padding-top:30px; }
+</style>
+<script type="text/javascript">
+ 	function mueveReloj(){ 
+   	 
+   	hoy = new Date()
+   	dd = hoy.getDate()
+	mm = hoy.getMonth()+1 //hoy es 0!
+    yyyy = hoy.getFullYear()
+    
+    if(dd<10) {
+    dd='0'+dd
+	} 
+
+	if(mm<10) {
+    mm='0'+mm
+	} 
+
+   hoy = yyyy+'-'+mm+'-'+dd;
+   	document.formBaja.fechaBaja.value = hoy
+   	
+} 
+</script>
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+    	<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/bajaEmpleado.js"></script>
+
+</head>
+<body onload="mueveReloj()" ng-app="tatei" ng-controller="bajaEmpleado" >
+    <div class="container">
+     <!-- Modal -->
+      <div class="modal fade bs-tatei-modal-sm" id="msload" tabindex="-1"
+          role="dialog" aria-hidden="true" data-backdrop="static">
+          <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h4 class="modal-title">
+                          <span class="glyphicon glyphicon-time">
+                          </span>Espera un momento..
+                       </h4>
+                  </div>
+                  <div class="modal-body">
+                      <div class="progress">
+                          <div class="progress-bar progress-bar-info
+                          progress-bar-striped active"
+                          style="width: 100%">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <!-- Modal fin -->
+      
+		<h2>Baja de Empleados</h2>
+		<div id="success" class="alert alert-success alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()"  data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>AVISO!</strong> <span id="msgaviso"></span>
+                  </div>
+                  <div id="alert" class="alert alert-danger alert-dismissable fade in">
+                    <a href="" class="close" ng-click="hideAlerts()" data-dismiss="hideAlerts()" aria-label="close">&times;</a>
+                    <strong>ATENCI&Oacute;N!</strong> <span id="msgerror"></span>
+                  </div>
+         <div class="panel panel-default">
+			<div class="panel-body">
+			<form name="formBaja"  ng-submit="grabar(empleado)" novalidate>
+			<div class="row">
+			<div class="col-sm-4">
+                        <div class="form-group form-group-sm" ng-repeat="empleado in resultado">
+                            <label for="numeroEmpleado" class="control-label">Numero de Empleado</label>
+                            <input type="text" name="numeroEmpleado" id="noEmpleado" required class="form-control" value={{empleado.noEmpleado}} disabled>
+                        </div>
+                    </div>
+             </div>
+			
+			 <div class="row">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm" ng-repeat="emp1 in resultado">
+                            <label for="nombres" class="control-label">Nombres</label>
+                            <input type="text" disabled value={{emp1.nombre}}&nbsp{{emp1.apellidoPat}}&nbsp{{emp1.apellidoMat}} class="form-control">
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row" ng-repeat="emple in resultado">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="puesto" class="control-label">Puesto</label>
+                           <input type="text" value={{emple.descripcionPuesto}} disabled class="form-control">
+                        </div>
+                    </div>
+                    
+                     <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fechaIngreso" class="control-label">Fecha Ingreso</label>
+                            <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input type="date" disabled value={{emple.fechaIngreso}} class="form-control">
+               				 </div>
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row" ng-repeat="datos in resultado">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="RFC" class="control-label">RFC</label>
+                           <input type="text" disabled value={{datos.rfc}} class="form-control">
+                        </div>
+                    </div>
+                    
+                     <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="nss" class="control-label">NSS</label>
+                          <input type="text" disabled value={{datos.nss}} class="form-control">
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row" ng-repeat="suel in resultado">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="sueldo" class="control-label">Sueldo</label>
+                           <input type="text" disabled value={{suel.sueldo}} class="form-control">
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row">
+			 <div class="col-sm-12">
+                        <div class="form-group form-group-sm" ng-class="{ 'has-error' : formBaja.comentario.$invalid && !formBaja.comentario.$pristine }">
+                            <label for="comentarios" class="control-label">Comentarios</label>
+                           <textarea name="comentario" class="form-control responsive-input" style="height: 78px;" ng-model="empleado.comentario"  required></textarea>
+                         <p ng-show="formBaja.comentario.$invalid && !formBaja.comentario.$pristine" class="help-block">El comentario es necesario.</p>
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm" ng-class="{ 'has-error' : formBaja.tipoSalida.$invalid && !formBaja.tipoSalida.$pristine }">
+                            <label for="tipoSalida" class="control-label">Tipo Salida</label>
+                           <select class="form-control" required name="tipoSalida" ng-model="empleado.codigoTipoSalida" ng-options="catalogo.codigo as catalogo.descripcion for catalogo in resultadoSalida" ng-change="getOptions2(empleado.codigoTipoSalida)">
+                           <option value="">--Seleccione el tipo de salida--</option>
+                           </select>
+                        <p ng-show="formBaja.tipoSalida.$invalid && !formBaja.tipoSalida.$pristine" class="help-block">Es necesario seleccionar el tipo salida.</p>
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm" ng-class="{ 'has-error' : formBaja.causaRenuncia.$invalid && !formBaja.causaRenuncia.$pristine }">
+                            <label for="causaRenuncia" class="control-label">Causa Renuncia</label>
+                          <select class="form-control" ng-model="empleado.codigoCausaSalida" name="causaRenuncia" required ng-options="catalogo.codigo as catalogo.descripcion for catalogo in resultadoRenuncia" ng-change="getOptions2(empleado.codigoCausaSalida)">
+                          <option value="">--Seleccione la causa de renuncia---</option>
+                          </select>
+                        <p ng-show="formBaja.causaRenuncia.$invalid && !formBaja.causaRenuncia.$pristine" class="help-block">Es necesario seleccionar la causa de la renuncia.</p>
+                        </div>
+                    </div>
+			 </div>
+			 
+			 <div class="row">
+			 <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <label for="fechaBaja" class="control-label">Fecha Baja</label>
+                            <div class="input-group">
+                  			<div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                  			<input type="date" name="fechaBaja" id="fechaBaja" class="form-control" disabled>
+               				 </div>
+                           
+                        </div>
+                    </div>
+			 </div>
+			 <input type="submit" value="Grabar" class="btn btn-success"  ng-disabled="formBaja.$invalid">
+			</form>
+			</div>
+			</div>
+    </div>
+</body>
+</html>

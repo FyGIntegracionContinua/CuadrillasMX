@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title> Registros Agenda Semanal </title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+<!--     <link href="css/bootstrap.min.css" rel="stylesheet">  lrss -->
+<!--     <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />  lrss-->
+    <!--script type="text/javascript" src="js/angular.min.js"></script-->
+    <style>
+      .datepicker-semana .datepicker tbody tr:hover {
+      background-color: #eee;
+      }
+      .datepicker-semana .datepicker tbody tr:hover td,
+      .datepicker-semana .datepicker tbody tr td.active {
+      border-radius: 0;
+      }
+      .datepicker-semana .datepicker tbody tr:hover td:last-child,
+      .datepicker-semana .datepicker tbody tr td.active:last-child {
+      border-radius: 0 3px 3px 0;
+      }
+      .datepicker-semana .datepicker tbody tr:hover td:first-child,
+      .datepicker-semana .datepicker tbody tr  td.active:nth-child(2) {
+      border-radius: 3px 0 0 3px;
+      }
+    </style>
+  </head>
+  <body ng-app="tatei">
+    <div class="container">
+      <h2> Registro Agenda Semanal </h2>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <form action="#">
+            <div class="row">
+              <div class="col-sm-5">
+                <div class="form-group form-group-sm">
+                  	<label class="control-label" for="vialidad">Vialidad</label>
+                	<select id="cboContrato" class="form-control" placeholder="Contrato" ng-model="objContratos" ng-options="contrato as contrato.descripcionVialidad for contrato in contratosActivos" ng-change="reiniciarPantalla(1)"></select>                  
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label class="control-label" for="residente">Residente</label>
+                  <input type="text" class="form-control" placeholder="" id="txtResidente" value="{{objContratos.nombreResidente}}" readonly></input>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label for="fecha" class="control-label">Fecha</label>
+                  <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-calendar" readonly></i></div>
+                    <input class="form-control" id="fecha" name="fecha" placeholder="YYYY-MM-DD" type="text" value="{{objContratos.fechaActual}}" disabled="true"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <div class="form-group">
+                  <label for="numPersonas" class="control-label">Num Personas</label>
+                  <input type="number" class="form-control" name="numPersonas" id="numPersonas" placeholder="0" value="{{objContratos.numeroPersonas}}" readonly>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-group">
+                  <label for="totalHrsHombre" class="control-label">Tot. hrs hombre</label>
+                  <input type="number" class="form-control" name="totalHrsHombre" id="totalHrsHombre" placeholder="0" value="{{objContratos.horasTotales}}" readonly>
+                </div>
+              </div>
+              <div class="col-sm-offset-1 col-sm-4">
+                <h4>Semana Registro:</h4>
+                <div class="datepicker-semana"></div>
+              </div>
+              <div class="col-sm-3">
+                <div class="row">
+                  <div class="col-sm-7">
+                    <div class="form-group">
+                      <label for="semana" class="control-label">Num. Semana</label>
+                      <input id="semana" type="text" name="semana" class="form-control" readonly placeholder="--">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group">
+                      <label for="ini" class="control-label">Dia Inicio</label>
+                      <input id="ini" type="text" name="ini" class="form-control" readonly placeholder="dd/mm/yyyy">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group">
+                      <label for="fin" class="control-label">Dia Fin</label>
+                      <input id="fin" type="text" name="fin" class="form-control" readonly placeholder="dd/mm/yyyy">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group" align="center">                      
+                    	<button type="button" class="btn btn-primary" name="btnConsulta" id="btnConsulta" style="margin-top: 25px;" ng-click="consultarAgenda(objContratos);" >Validar</button>
+                    </div>
+                  </div>
+                </div>                
+              </div>
+            </div>
+            <div>
+            	<div class="row">
+                	<div class="col-sm-12" align="center">
+						<button type="button" class="btn btn-primary" name="btnLunes" id="btnD1" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(1);" >Lunes</button>
+						<button type="button" class="btn btn-primary" name="btnMartes" id="btnD2" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(2);">Martes</button>
+						<button type="button" class="btn btn-primary" name="btnMiercoles" id="btnD3" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(3);">Miercoles</button>
+						<button type="button" class="btn btn-primary" name="btnJueves" id="btnD4" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(4);">Jueves</button>
+						<button type="button" class="btn btn-primary" name="btnViernes" id="btnD5" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(5);">Viernes</button>
+						<button type="button" class="btn btn-primary" name="btnSabado" id="btnD6" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(6);">Sabado</button>
+						<button type="button" class="btn btn-primary" name="btnDomingo" id="btnD7" style="margin-top: 25px;" ng-click="obtenerFechaSeleccionada(7);">Domingo</button>
+            		</div>
+            	</div>
+            </div>
+            <div class="row">
+                <div class="panel panel-default" style="margin: 5px;">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Plan de Actividades</h3>
+                  </div>
+                  <div class="panel-body">
+                    <div class="row">
+                      <div class="col-sm-3">
+                        <label for="diaActividad" class="control-label">Día</label>
+                        <div class="input-group">
+                          <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                          <input class="form-control" id="diaActividad" name="diaActividad" placeholder="YYYY-MM-DD" type="text" disabled="true"/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <div class="row">
+                          <div class="col-sm-9">
+                            <label for="actividadCombo" class="control-label">Actividad</label>
+     						<select id="cboActividad" class="form-control" placeholder="Actividad" ng-model="objActividades" ng-options="catalogo as catalogo.descripcion for catalogo in catActividades"></select>
+                          </div>
+                          <div class="col-sm-3">
+                            <button type="button" class="btn btn-primary" name="agregarActividadBtn" id="agregarActividadBtn" style="margin-top: 25px;" ng-click="agregarActividades(objActividades)">Agregar</button>
+                          </div>
+                        </div>
+                        <br>
+                        <div style="width:400px; height: 250px; overflow-y: scroll; overflow-x:hidden;">
+	                        <div class="row">
+	                          <div class="col-sm-12">
+	                            <div class="table-responsive">
+	                              <table class="table table-bordered">
+	                                <thead>
+	                                  <tr class="info">
+	                                    <td width="90%">Actividad</td>
+	                                    <td width=10%"></td>
+	                                  </tr>
+	                                </thead>
+	                                <tbody>
+	                                  <tr ng-repeat="actividad in gridActividades">
+	                                    <!--<td>{{actividad.codigo}}</td>  -->
+	                                    <td width="90%">{{actividad.descripcion}}</td>
+	                                    <td width="10%"><center><span class="fa fa-times fa-2x" aria-hidden="true" style="color: red; font-size: 2pd; cursor:pointer;" ng-click="eliminarActividades(actividad.codigo)"></span></center></td>
+	                                  </tr>
+	                                </tbody>
+	                              </table>
+	                            </div>
+	                          </div>
+	                        </div>
+	                      </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="row">
+                          <div class="col-sm-9">
+                          	<label for="materialesCombo" class="control-label">Materiales</label>
+							<select id="cboArticulo" class="form-control" placeholder="Articulo" ng-model="objArticulos" ng-options="catalogo as catalogo.descripcion for catalogo in catArticulos"></select>
+                          </div>
+                          <div class="col-sm-3">
+                            <button type="button" class="btn btn-primary" name="agregarMaterialesBtn" id="agregarMaterialesBtn" style="margin-top: 25px;" ng-click="agregarArticulos(objArticulos)">Agregar</button>
+                          </div>
+                        </div>
+                        <br>
+						<div style="width:400px; height: 250px; overflow-y: scroll; overflow-x:hidden;">                        
+	                        <div class="row">
+	                          <div class="col-sm-12">
+	                            <div class="table-responsive">
+	                              <table class="table table-bordered">
+	                                <thead>
+	                                  <tr class="info">
+	                                    <td width="90%">Materiales</td>
+	                                    <td width="10%"></td>
+	                                  </tr>
+	                                </thead>
+	                                <tbody>
+	                                  <tr ng-repeat="articulo in gridArticulos">
+	                                    <!--<td>{{articulo.codigo}}</td> -->
+	                                    <td width="90%">{{articulo.descripcion}}</td>
+	                                    <td width="10%"><center><span class="fa fa-times fa-2x" aria-hidden="true" style="color: red; font-size: 2pd; cursor:pointer;" ng-click="eliminarArticulos(articulo.codigo)"></span></center></td>
+	                                  </tr>
+	                                </tbody>
+	                              </table>
+	                            </div>
+	                          </div>
+	                        </div>
+	                      </div>
+	                    </div>
+                    </div>
+                    <br>
+                    <!-- mapa -->
+	                <div class="row">
+	                	<div class="col-sm-6">
+	                  		<div class="row">
+	                    		<div class="col-sm-12 ">	
+	                      			<h4>Dirección</h4>
+	                      			<div class="row">
+	                        			<div class="col-sm-3">
+	                          				<span id="txtkm"></span>
+	                        			</div>
+	                        			<div class="col-sm-9">
+	                          				<span id="km"></span>
+	                        			</div>
+	                      			</div>
+	                    			<div class="tbl-content" style="height:590px; overflow-y: scroll; overflow-x:hidden;">
+	                      				<table cellpadding="0" cellspacing="0" border="0">
+	                        				<tbody id="tramos" width="493px">
+	                        				</tbody>
+	                      				</table>
+	                    			</div>
+	                    		</div>
+	                  		</div>
+	                	</div>
+	                	<div class="col-sm-6">
+	                  		<div class="row">
+	                    		<div class="col-sm-offset-4 col-sm-4"><button type="button" ng-click="limpiarMarcadores()" class="btn btn-danger" style="margin: 25px;">Limpiar Mapa</button></div>
+	                  		</div>
+	                  		<div class="row">
+	                    		<div class="col-sm-12">
+	                      			<div id="map" style="width:100%; height:550px"></div>
+	                    		</div>
+	                  		</div>
+	                	</div>
+	                </div>
+                <!-- fin nuevo -->                    
+                    <br>
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <div class="form-group">
+                          <label for="observaciones" class="control-label">Observaciones</label>
+                          <textarea name="observaciones" class="form-control" rows="3" id="observaciones"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-offset-9 col-sm-3">
+                        <button type="button" class="btn btn-success btn-block" id="agregarAgenda" name="agregarAgenda" ng-click="agregarAgenda()">Agregar agenda</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr class="success">
+                        <td width="15%">Dia</td>
+                        <td width="15%">Avance</td>
+                        <td width="63%">Tramo</td>
+                        <td width="7%">Eliminar</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="direccion in diasAgenda">
+                        <td width="15%">{{direccion.diaDesc}}</td>
+                        <td width="15%">{{direccion.metros}}</td>
+                        <td width="63%">{{direccion.direccion}}</td>
+                        <td width="7%"><center><span class="fa fa-times fa-2x" aria-hidden="true" style="color: red; font-size: 2pd; cursor:pointer;" ng-click="eliminarDiaAgenda(direccion.fecha, direccion.idAgendaDetalle)"></span></center></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-sm-6">
+           		<div class="row">
+             		<div class="col-sm-12 ">	
+               			<h4>Dirección</h4>
+               			<div class="row">
+                 			<div class="col-sm-3">
+                   				<span id="txtkm2"></span>
+                 			</div>
+                 			<div class="col-sm-9">
+                   				<span id="km2"></span>
+                 			</div>
+               			</div>
+             			<div class="tbl-content" style="height:590px; overflow-y: scroll; overflow-x:hidden;">
+               				<table cellpadding="0" cellspacing="0" border="0">
+                 				<tbody id="tramos2" width="493px">
+                 				</tbody>
+               				</table>
+             			</div>
+             		</div>
+           		</div>              
+              </div>
+              <div class="col-sm-6">
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div id="map2" style="width:100%; height:550px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">            
+              <div class="col-sm-2"><button type="button" class="btn btn-block btn-danger" style="margin: 25px;" ng-click="reiniciarPantalla()" id="limpiarTotal">Limpiar</button></div>
+              <div class="col-sm-offset-1 col-sm-2"><button type="button" class="btn btn-block btn-success" style="margin: 25px;" ng-click="registrarAgenda(objContratos)">Guardar</button></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/locales/bootstrap-datepicker.es.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCabJe-6SF_dgIWW5eKjHynpbcvzoJmY4E&callback=initMap"></script>
+  </body>
+</html>

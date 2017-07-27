@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.fyg.cuadrillas.dao.VialidadTx">
+<insert id="registraVialidad" parameterType="Vialidad" useGeneratedKeys="true" keyProperty="id_vialidad"  keyColumn="id_vialidad">
+INSERT INTO vialidad(nombre,usuario_alta,fecha_alta,usuario_ult_mod,fecha_ult_mod,estatus)
+VALUES(#{nombre},#{usuarioAlta},now(),#{usuarioUltMod},now(),'A')
+<selectKey keyProperty="idVialidad" resultType="Integer" order="AFTER">
+	SELECT LAST_INSERT_ID();
+	</selectKey>
+</insert>
+
+<update id="inactivaVialidad" parameterType="Vialidad">
+UPDATE vialidad
+    SET
+    usuario_baja = #{usuarioBaja},
+    fecha_baja = now(),
+    usuario_ult_mod = #{usuarioUltMod},
+    fecha_ult_mod = now(),
+    estatus = 'I'
+WHERE id_vialidad = #{idVialidad}
+AND estatus = 'A'
+</update>
+
+<insert id="registraCoordenadas" parameterType="VialidadCoordenadas">
+INSERT INTO vialidad_coordenadas(id_vialidad,latitud,longitud,fecha_alta,estatus)
+VALUES
+<foreach collection="list" item="element" index="index" separator=",">
+(#{element.idVialidad},#{element.latitud},#{element.longitud},now(),'A')
+</foreach>
+</insert>
+
+<delete id="eliminaCoordenadas" parameterType="VialidadCoordenadas">
+DELETE FROM vialidad_coordenadas WHERE id_vialidad = #{idVialidad}
+</delete>
+</mapper>

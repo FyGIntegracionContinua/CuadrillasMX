@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.fyg.cuadrillas.dao.ContratoTx">
+
+<insert id="altaContrato" parameterType="Contrato" useGeneratedKeys="true" keyProperty="id_contrato"  keyColumn="id_contrato">
+	INSERT INTO contrato
+	(
+		codigo_vialidad, codigo_contrato,	codigo_documento, codigo_empresa,
+		numero_documento, monto, subtotal, fecha_inicio, fecha_fin,	dias_duracion,
+		pct_avance,	fecha_registro,	id_cuadrilla, observaciones, url, metros,
+		usuario_alta, fecha_alta, estatus
+	)
+VALUES
+	(
+		(SELECT codigo_vialidad FROM cuadrilla WHERE id_cuadrilla = #{idCuadrilla}),
+		#{codigoContrato},	#{codigoDocumento}, #{codigoEmpresa},
+		#{numeroDocumento}, #{monto}, #{subtotal}, #{fechaInicio}, #{fechaFin},	#{diasDuracion},
+		#{pctAvance},	#{fechaRegistro},	#{idCuadrilla}, #{observaciones}, #{url}, #{metros},
+		#{usuarioAlta}, now(), #{estatus}
+	)
+	<selectKey keyProperty="idContrato" resultType="Integer" order="AFTER">
+		SELECT LAST_INSERT_ID();
+	</selectKey>
+</insert>
+
+<insert id="registraCoordenadasContrato" parameterType="Coordenada">
+	INSERT INTO contrato_coordenadas
+		(
+			id_contrato,	orden,	direccion,
+			latitud,	longitud,	fecha_alta,	estatus
+		)
+	VALUES
+	<foreach collection="list" item="element" index="index" separator=",">
+	 	(
+	 	 	#{element.idContrato},	 #{element.orden},	#{element.direccion},
+			#{element.latitud},	#{element.longitud}, now(),	'A'
+	 	)
+	</foreach>
+</insert>
+
+<update id="bajaContrato" parameterType="Contrato">
+	UPDATE contrato SET
+		fecha_baja = now(),
+		usuario_baja = #{usuarioBaja},
+	    estatus = 'I'
+	WHERE id_contrato = #{idContrato}
+	AND estatus = 'A'
+</update>
+
+<delete id="eliminaCoordenadass" parameterType="java.util.HashMap">
+DELETE FROM contrato_coordenadas WHERE id_contrato = #{id_contrato}
+</delete>
+
+<update id="modificaContrato" parameterType="Contrato">
+UPDATE contrato SET
+codigo_vialidad = #{codigoVialidad},
+codigo_contrato = #{codigoContrato},
+codigo_documento = #{codigoDocumento},
+codigo_empresa =  #{codigoEmpresa},
+numero_documento = #{numeroDocumento},
+monto = #{monto},
+subtotal = #{subtotal},
+fecha_inicio = #{fechaInicio},
+fecha_fin = #{fechaFin},
+dias_duracion = #{diasDuracion},
+id_cuadrilla = #{idCuadrilla},
+observaciones = #{observaciones},
+metros = #{metros},
+usuario_ult_mod = #{usuarioUltMod},
+fecha_ult_mod =  now()
+WHERE id_contrato = #{idContrato}
+AND estatus = 'A'
+</update>
+
+<insert id="registraContratoDocumentosExtra" parameterType="ContratoDocumento">
+INSERT INTO contrato_documentos
+		( id_contrato,nombre,codigo_documento,url,usuario_alta,fecha_alta,estatus
+		)
+VALUES
+		(
+		#{idContrato}, #{nombre} , #{codigoDocumento}, #{url}, #{usuarioAlta}, now(), 'A'
+		)
+</insert>
+</mapper>

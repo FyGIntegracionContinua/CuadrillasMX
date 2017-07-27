@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="hsamano">
+        
+        <!-- Compiled and minified CSS -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="css/dropify.min.css">
+        
+        <style>
+            .container {
+                width: 95%;
+            }
+            .lmask {
+                position: absolute;
+                height: 100%;
+                width: 100%; 
+                background-color: #fff;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: 0;
+                z-index: 9999;;
+                opacity: 0.9;
+            }
+
+        </style>
+    </head>
+
+    <body ng-app="tatei" ng-controller="AppCtrl">
+        <div id="msload" class="lmask bottom-sheet" style="width: 100%; height: 100%;">
+            <div class="modal-content">
+                <h5 class="green-text text-darken-4" style="text-align: center;">Espera un momento...</h5>
+                <div class="progress  light-green">
+                    <div class="indeterminate  lime lighten-1"></div>
+                </div>
+            </div>
+        </div>
+        <main>
+        <div class="container">
+            <div class="row">
+                <div class="col s12" ng-controller="ModalController">
+                    <ul class="collapsible popout" data-collapsible="expandable">
+                        <li>
+                            <div class="collapsible-header active"><i class="material-icons">trending_up</i>Avances (Planificado)</div>
+                            <div class="collapsible-body" style="padding: 10px;">
+                                <div class="row">
+                                    <div class="col s12">
+                                            <div class="input-field col s6">
+                                                <input placeholder="xxxxx" id="tramoInicial" type="text" class="validate" ng-model="tramoInicialP" disabled>
+                                                <label for="tramoInicial">Tramo Inicial</label>
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <input placeholder="xxxxx" id="tramoFinal" type="text" class="validate" ng-model="tramoFinalP" disabled>
+                                                <label for="tramoFinal">Tramo Final</label>
+                                            </div>
+                                            <!--div class="input-field col s4">
+                                                <input placeholder="xxxxx" id="tramoFinal" type="text" class="validate">
+                                                <label for="tramoFinal">Tramo Final</label>
+                                            </div-->
+                                            <div class="input-field col s12">
+                                                <div id="map" style="width:100%; height:300px"></div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-header active"><i class="material-icons">multiline_chart</i>Avanves (Real)</div>
+                            <div class="collapsible-body" style="padding: 10px;">
+                                <div class="row">
+                                    <div class="col s12">
+                                        <div class="input-field col s6">
+                                                <!-- input placeholder="xxxxx" id="tramoInicial2" type="text" class="validate">
+                                                <label for="tramoInicial">Tramo Inicial</label-->
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <!-- input placeholder="xxxxx" id="tramoFinal2" type="text" class="validate">
+                                                <label for="tramoFinal">Tramo Final</label-->
+                                            </div>
+                                            <!--div class="input-field col s4">
+                                                <input placeholder="xxxxx" id="tramoFinal" type="text" class="validate">
+                                                <label for="tramoFinal">Tramo Final</label>
+                                            </div-->
+                                            <div class="input-field col s12">
+                                                <div id="map2" style="width:100%; height:300px"></div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-header active"><i class="material-icons">event_note</i>Actividades</div>
+                            <div class="collapsible-body" style="padding: 10px;">
+                                <div class="row">
+                                    <div class="col s10">
+                                    	<!--input  type="file" id="input-file-events" class="dropify-event" onchange="encodeImageFileAsURL(this)" /-->
+                                    </div>
+                                    <div class="col s2">
+                                    	<a class="btn-floating btn-large waves-effect waves-light green" data-target="edicionActividades" ng-click="nuevaActividad()"><i class="material-icons">add</i></a>
+                                        <!--a class="waves-effect waves-light btn"data-target="edicionActividades" ng-click="nuevaActividad()">Agregar</a-->
+                                    </div>
+                                </div>
+                                <div class="row" ng-repeat="actividad in listaActividades">
+                                    <div class="col s12">
+                                        <div class="card">
+                                            <div class="card-content">
+                                                <span class="card-title">{{actividad.descripcionActividad}}</span>
+                                                <div class="row">
+                                                	<div class="col s6">
+		                                                <span style="font-size: 12px;">Estado: <span  style="font-weight: 300;">{{actividad.descripcionEstado}}</span></span><br/>
+		                                                <span style="font-size: 12px;">Prioridad: <span  style="font-weight: 300;">{{actividad.descripcionPrioridad}}</span></span>
+	                                                </div>
+	                                                <div class="col s6">
+														<span style="font-size: 12px;">Planeado: <span  style="font-weight: 300;">{{actividad.planeada}}</span></span><br/>
+	                                                </div>
+                                                </div>
+                                                
+                                                <div class="progress">
+                                                    <div class="determinate" style="width: {{actividad.porcentaje}}%"></div>
+                                                </div>
+                                                <span>{{actividad.porcentaje}} %</span>
+                                            </div>
+                                            <div class="card-action">
+                                                <a class="waves-effect waves-light btn purple" data-target="edicionActividades" ng-click="abrir(actividad)" modal complete="completeCallback()" ><i class="material-icons left">edit</i>editar</a>
+                                                <a class="waves-effect waves-light btn red" ng-disabled="actividad.planeada == 'S'" ng-click="eliminarActividadDetalle(actividad)"><i class="material-icons left">delete</i>Eliminar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Edicion Actividades -->
+                            <div id="edicionActividades" class="modal modal-fixed-footer">
+                                <div class="modal-content">
+                                    <h6>Datos de la Actividad</h6>
+                                    <div class="row">
+                                        <form class="col s12" name="formEdicionActividades">
+                                        <!--div class="row">
+                                        	<div class="col s6">
+                                        		<input  type="file" ng-model="actividad.imagen1" file-model="actividad.imagen1" id="input-file-events1" class="dropify-event" ng-change="subirImagen(actividad)" />
+                                        	</div>
+                                        	<div class="col s6">
+                                        		<input  type="file" file-model="actividad.imagen2" id="input-file-events2" class="dropify-event" onchange="subirImagen(actividad)" />
+                                        	</div>
+                                        </div -->
+                                        <div class="row">
+                                            <div class="input-field col s6">
+                                                <select id="actividadSelect" ng-model="actividad.codigoActividad" material-select watch>
+                                                    <option value="{{value.codigo}}" ng-repeat="value in actividadesCat">{{value.descripcion}}</option>
+                                                </select>
+                                                <label>Actividad</label>
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <select ng-model="actividad.codigoPrioridad" material-select watch>
+                                                    <option value="{{value.codigo}}" ng-repeat="value in prioridadCat">{{value.descripcion}}</option>
+                                                </select>
+                                                <label>Prioridad</label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="input-field col s6">
+                                                <select ng-model="actividad.codigoEstado" material-select watch>
+                                                    <option value="{{value.codigo}}" ng-repeat="value in estadoCat">{{value.descripcion}}</option>
+                                                </select>
+                                                <label>Estado</label>
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <input id="tiempoDestinado" data-length="3" ng-model="actividad.tiempoDestinado" type="text" class="validate">
+                                                    <label for="tiempoDestinado" class="active">Tiempo destinado</label>
+                                                </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="input-field col s6">
+                                                <input id="numPersonas" data-length="3" ng-model="actividad.numeroPersonas" type="text" class="validate">
+                                                <label for="numPersonas" class="active"># Personas</label>
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <input id="numUnidades" data-length="3" ng-model="actividad.numeroUnidades" type="text" class="validate">
+                                                <label for="numUnidades" class="active"># Unidades</label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="input-field col s6">
+                                                <input id="pctCompletado" data-length="3" ng-model="actividad.porcentaje" type="text" class="validate">
+                                                <label for="pctCompletado" class="active">% completado</label>
+                                            </div>
+                                            <div class="input-field col s6">
+                                                <select  type="text" ng-model="actividad.codigoListoVencido" class="validate" material-select watch>
+                                                    <option value="{{value.codigo}}" ng-repeat="value in listoVencidoCat">{{value.descripcion}}</option>
+                                                </select>
+                                                <label>Listo/Vencido</label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="input-field col s12">
+                                                <i class="material-icons prefix">comment</i>
+                                                <textarea id="observacionesGenerales" ng-model="actividad.observaciones" class="materialize-textarea"></textarea>
+                                                <label for="observacionesGenerales" class="active">Observaciones de la Actividad</label>
+                                            </div>
+                                        </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancelar</a>
+                                    <a ng-click="guardarActividadDetalle(actividad)" class="modal-action waves-effect waves-green btn-flat ">Guardar</a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-header active"><i class="material-icons">verified_user</i>Enviar Autorización</div>
+                            <div class="collapsible-body" style="padding: 10px;">
+                                <div class="row">
+                                    <div class="col s12">
+                                        <div class="input-field col s9">
+                                                <i class="material-icons prefix">comment</i>
+                                                <textarea id="observacionesGenerales2" ng-model="observacionesGenerales2"class="materialize-textarea"></textarea>
+                                                <label for="observacionesGenerales2"  class="active">Comentarios / Observaciones</label>
+                                            </div>
+                                            <div class="input-field col s3">
+                                                <a ng-click="terminarCaptura()" class="modal-action waves-effect waves-green  "><i class="material-icons left">done_all</i>Enviar</a>
+                                            </div>
+                
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </main>
+        </div>
+
+        
+
+
+
+        <!-- CONTROLADOR INTERNO  -->
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCabJe-6SF_dgIWW5eKjHynpbcvzoJmY4E&libraries=geometry"></script> <!-- &callback=initMap -->
+        <!-- JavaScript for: jQuery, angular, materialize, and angular-materialize. All of which are needed. -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+        <script src="js/dropify.min.js"></script>
+        <!-- Compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.min.css">
+        <!-- Compiled and minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-materialize/0.2.2/angular-materialize.min.js"></script>
+        <!-- app -->
+        <script defer type="text/javascript" src="app.js"></script>
+       
+    </body>
+</html>

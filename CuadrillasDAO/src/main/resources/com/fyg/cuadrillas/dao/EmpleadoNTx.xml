@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fyg.cuadrillas.dao.EmpleadoNTx">
+
+<resultMap type="Empleado" id="empleado">
+	<result column="id_empleado" property="idEmpleado"/>
+	<result column="no_empleado" property="noEmpleado"/>
+	<result column="nombre" property="nombre"/>
+	<result column="apellido_pat" property="apellidoPat"/>
+	<result column="apellido_mat" property="apellidoMat"/>
+	<result column="sexo" property="sexo"/>
+	<result column="rfc" property="rfc"/>
+	<result column="rfc_calculado" property="rfcCalculado"/>
+	<result column="fecha_nacimiento" property="fechaNacimiento"/>
+	<result column="fecha_ingreso" property="fechaIngreso"/>
+	<result column="codigo_puesto" property="codigoPuesto"/>
+	<result column="descripcion_puesto" property="descripcionPuesto"/>
+	<result column="codigo_vialidad" property="codigoVialidad"/>
+	<result column="codigo_area" property="codigoArea"/>
+	<result column="codigo_talla" property="codigoTalla"/>
+	<result column="id_cuadrilla" property="idCuadrilla"/>
+	<result column="sueldo" property="sueldo"/>
+	<result column="frecuencia_pago" property="frecuenciaPago"/>
+	<result column="nss" property="nss"/>
+	<result column="no_credito_infonavit" property="noCreditoInfonavit"/>
+	<result column="telefono" property="telefono"/>
+	<result column="observaciones" property="observaciones"/>
+	<result column="fecha_baja" property="fechaBaja"/>
+	<result column="codigo_tipo_salida" property="codigoTipoSalida"/>
+	<result column="codigo_causa_salida" property="codigoCausaSalida"/>
+	<result column="estatus" property="estatus"/>
+	<result column="alta_imss" property="altaImss"/>
+	<result column="usuario" property="usuario"/>
+	<result column="contrasena" property="contrasena"/>
+	<result column="id_perfil" property="idPerfil"/>
+	<result column="nombre_perfil" property="nombrePerfil"/>
+	<result column="calificacion" property="calificacion"/>
+	<result column="perfil_empleado" property="perfilEmpleado"/>
+	<result column="codigo_empresa" property="codigoEmpresa"/>
+	<result column="descripcion_empresa" property="descripcionEmpresa"/>
+</resultMap>
+
+<resultMap type="EmpleadoHuella" id="empleadoHuella">
+<result column="id_huella" property="idHuella"/>
+<result column="id_empleado" property="idEmpleado"/>
+<result column="huella" property="huella"/>
+<result column="codigo_mano" property="codigoMano"/>
+<result column="codigo_dedo" property="codigoDedo"/>
+<result column="descripcion_mano" property="descripcionMano"/>
+<result column="descripcion_dedo" property="descripcionDedo"/>
+</resultMap>
+
+<select id="consultaEmpleado" parameterType="Empleado" resultMap="empleado">
+	SELECT
+		e.id_empleado, e.no_empleado, e.nombre, e.apellido_pat, e.apellido_mat, e.sexo, e.rfc, e.rfc_calculado, e.fecha_nacimiento, e.fecha_ingreso,
+		e.codigo_puesto, e.codigo_vialidad, e.codigo_area,  e.codigo_talla, e.sueldo, e.frecuencia_pago,
+		e.nss, e.no_credito_infonavit, e.telefono, e.observaciones,e.id_cuadrilla,e.calificacion,e.codigo_empresa,
+		e.fecha_baja, e.codigo_tipo_salida, e.codigo_causa_salida, e.estatus, e.alta_imss,u.usuario,u.contrasena,u.id_perfil,p.nombre AS nombre_perfil,
+		c.descripcion AS descripcion_puesto,
+		ca.descripcion AS descripcion_empresa
+	FROM empleado e
+	LEFT JOIN usuario u ON u.id_empleado = e.id_empleado
+	LEFT JOIN perfil p ON p.id_perfil = u.id_perfil
+	LEFT JOIN catalogo c ON c.codigo = e.codigo_puesto
+	LEFT JOIN catalogo ca ON ca.codigo = e.codigo_empresa
+	<where>
+	 <if test="idEmpleado !=null">
+	 	e.id_empleado = #{idEmpleado}
+	 </if>
+	 <if test="noEmpleado !=null">
+	 	e.no_empleado = #{noEmpleado}
+	 </if>
+	 <if test="rfcCalculado !=null">
+	 	AND e.rfc_calculado like #{rfcCalculado}
+	 </if>
+	</where>
+	ORDER BY estatus, fecha_ingreso desc
+</select>
+
+<select id="empleadoActivo" parameterType="asistencia" resultType="int">
+SELECT count(estatus) as estatus
+FROM empleado
+WHERE id_empleado = #{idEmpleado}
+AND estatus ='I'
+</select>
+
+<select id="existeNoEmpleado" parameterType="empleado" resultType="int">
+SELECT count(no_empleado) as no_empleado
+FROM empleado
+WHERE no_empleado = #{noEmpleado}
+</select>
+
+<select id="existeRfcCalculado" parameterType="empleado" resultType="int">
+SELECT count(rfc_calculado) as rfc_calculado
+FROM empleado
+WHERE rfc_calculado = #{rfcCalculado}
+</select>
+
+<select id="existeNoEmpleadoDato" parameterType="empleado" resultType="int">
+SELECT count(no_empleado) as no_empleado
+FROM empleado
+WHERE no_empleado = #{noEmpleado}
+AND id_empleado != #{idEmpleado}
+</select>
+
+<select id="existeRfcCalculadoDato" parameterType="empleado" resultType="int">
+SELECT count(rfc_calculado) as rfc_calculado
+FROM empleado
+WHERE rfc_calculado = #{rfcCalculado}
+AND id_empleado != #{idEmpleado}
+</select>
+
+<select id="consultaDocumentos" parameterType="empleadoDocumento" resultType="empleadoDocumento">
+SELECT d.codigo_emp_doc AS codigoEmpDoc, d.estatus,c.descripcion AS descripcionDocumento
+FROM empleado_documentos d
+LEFT JOIN catalogo c ON c.codigo = d.codigo_emp_doc
+WHERE id_empleado = #{idEmpleado}
+</select>
+
+<select id="consultaColaboradores" parameterType="Empleado" resultMap="empleado">
+SELECT c.descripcion AS perfil_empleado,
+       e.nombre AS nombre,
+       e.apellido_pat AS apellido_pat,
+       e.apellido_mat AS apellido_mat,
+	   CASE
+	   	WHEN e.estatus = 'A' THEN 'Activo'
+	   	WHEN e.estatus = 'I' THEN 'Suspendido'
+	   END AS estatus,
+	   e.calificacion AS calificacion
+FROM empleado e
+LEFT JOIN catalogo c ON c.codigo = e.codigo_puesto
+WHERE e.id_cuadrilla = #{idCuadrilla}
+ORDER BY e.estatus, e.fecha_ingreso
+</select>
+
+<select id="existeAutImss" parameterType="empleado" resultType="int">
+SELECT count(usuario_aut_imss)
+FROM empleado
+WHERE usuario_aut_imss = #{usuarioAutImss}
+AND id_empleado = #{idEmpleado}
+</select>
+
+<select id="consultaEmpleadoWS" parameterType="Empleado" resultMap="empleado">
+	SELECT
+		e.id_empleado, e.no_empleado, e.nombre, e.apellido_pat, e.apellido_mat, e.sexo, e.rfc, e.rfc_calculado, e.fecha_nacimiento, e.fecha_ingreso,
+		e.codigo_puesto, e.codigo_vialidad, e.codigo_area,  e.codigo_talla, e.sueldo, e.frecuencia_pago,
+		e.nss, e.no_credito_infonavit, e.telefono, e.observaciones,e.id_cuadrilla,e.calificacion,e.codigo_empresa,
+		e.fecha_baja, e.codigo_tipo_salida, e.codigo_causa_salida, e.estatus, e.alta_imss,u.usuario,u.contrasena,u.id_perfil,p.nombre AS nombre_perfil,
+		c.descripcion AS descripcion_puesto,
+		ca.descripcion AS descripcion_empresa
+	FROM empleado e
+	LEFT JOIN usuario u ON u.id_empleado = e.id_empleado
+	LEFT JOIN perfil p ON p.id_perfil = u.id_perfil
+	LEFT JOIN catalogo c ON c.codigo = e.codigo_puesto
+	LEFT JOIN catalogo ca ON ca.codigo = e.codigo_empresa
+</select>
+
+<select id="consultaHuellaEmpleado" parameterType="EmpleadoHuella" resultMap="empleadoHuella">
+SELECT
+	h.id_huella,
+	h.id_empleado,
+	h.huella,
+	h.codigo_mano,
+	h.codigo_dedo,
+	ca.descripcion AS descripcion_mano,
+	cat.descripcion AS descripcion_dedo
+FROM empleado_huella h
+LEFT JOIN catalogo ca ON ca.codigo = h.codigo_mano
+LEFT JOIN catalogo cat ON cat.codigo = h.codigo_dedo
+WHERE h.id_empleado = #{idEmpleado}
+</select>
+</mapper>

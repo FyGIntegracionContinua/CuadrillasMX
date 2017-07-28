@@ -21,22 +21,5 @@
 		<module>CuadrillasWEB</module>
 		<module>CuadrillasWS</module>		
 	</modules>
-
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-javadoc-plugin</artifactId>
-    <version>2.10.2</version>
-    <executions>
-        <execution>
-            <id>attach-javadocs</id>
-            <goals>
-                <goal>jar</goal>
-            </goals>
-            <configuration> <!-- add this to disable checking -->
-                <additionalparam>-Xdoclint:none</additionalparam>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
 	
 </project>
